@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../core/config/app_environment.dart';
+import '../core/theme/app_theme.dart';
+import 'router/app_router.dart';
+
 class TimeTrackerApp extends StatelessWidget {
-  const TimeTrackerApp({super.key});
+  final AppConfig config;
+
+  const TimeTrackerApp({super.key, required this.config});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Time Tracker',
+      title: config.appName,
 
-      home: const Scaffold(body: Center(child: Text('Time Tracker'))),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
+
+      routerConfig: appRouter,
     );
   }
 }
