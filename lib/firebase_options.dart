@@ -57,22 +57,22 @@ class DefaultFirebaseOptions {
     projectId: 'time-tracker-dev-4d1cc',
     storageBucket: 'time-tracker-dev-4d1cc.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAbcaRvUXQ576MMwllsyIWxrxWjufKtCy8',
     appId: '1:685784109582:ios:cf71ee23e4fc2af3bd625f',
     messagingSenderId: '685784109582',
     projectId: 'time-tracker-dev-4d1cc',
     storageBucket: 'time-tracker-dev-4d1cc.firebasestorage.app',
+    iosClientId: '685784109582-ofkf1n5b5t6o7beon0r8roku8704d6m5.apps.googleusercontent.com',
     iosBundleId: 'com.example.timeTracker',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAbcaRvUXQ576MMwllsyIWxrxWjufKtCy8',
     appId: '1:685784109582:ios:cf71ee23e4fc2af3bd625f',
     messagingSenderId: '685784109582',
     projectId: 'time-tracker-dev-4d1cc',
     storageBucket: 'time-tracker-dev-4d1cc.firebasestorage.app',
+    iosClientId: '685784109582-ofkf1n5b5t6o7beon0r8roku8704d6m5.apps.googleusercontent.com',
     iosBundleId: 'com.example.timeTracker',
   );
 

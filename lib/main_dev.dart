@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
 import 'core/config/app_environment.dart';
 import 'firebase_options.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 const appConfig = AppConfig(
   environment: AppEnvironment.development,
@@ -15,6 +16,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await GoogleSignIn.instance.initialize(
+    serverClientId:
+        '685784109582-mhaqnb1jj52mkm0rv7bq21ttorfenajf.apps.googleusercontent.com',
+  );
 
   runApp(ProviderScope(child: TimeTrackerApp(config: appConfig)));
 }

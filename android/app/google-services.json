@@ -12,7 +12,12 @@
           "package_name": "com.example.time_tracker"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "685784109582-mhaqnb1jj52mkm0rv7bq21ttorfenajf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCoYUXQtR-JmSp9f2nMAm-H8duCxnPpunk"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "685784109582-mhaqnb1jj52mkm0rv7bq21ttorfenajf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "685784109582-ofkf1n5b5t6o7beon0r8roku8704d6m5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.timeTracker"
+              }
+            }
+          ]
         }
       }
     }
