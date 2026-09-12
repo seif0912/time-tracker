@@ -82,6 +82,7 @@ class TasksScreen extends ConsumerWidget {
                         ],
                       ),
                       trailing: _buildTimerControls(
+                        context,
                         ref,
                         task.id,
                         session,
@@ -99,6 +100,7 @@ class TasksScreen extends ConsumerWidget {
   }
 
   Widget _buildTimerControls(
+    BuildContext context,
     WidgetRef ref,
     int taskId,
     TimerSessionState? session,
@@ -129,6 +131,13 @@ class TasksScreen extends ConsumerWidget {
             icon: const Icon(Icons.archive_outlined),
             onPressed: () {
               ref.read(taskControllerProvider.notifier).archiveTask(taskId);
+            },
+          ),
+          IconButton(
+            tooltip: 'Delete',
+            icon: const Icon(Icons.delete_outline_rounded),
+            onPressed: () {
+              _confirmDelete(context, ref, taskId);
             },
           ),
         ],
@@ -210,6 +219,41 @@ class TasksScreen extends ConsumerWidget {
         .read(taskControllerProvider.notifier)
         .createTask(name: name.trim());
   }
+}
+
+Future<void> _confirmDelete(
+  BuildContext context,
+  WidgetRef ref,
+  int taskId,
+) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: const Text('Delete task?'),
+        content: const Text(
+          'This task will be removed from your active tasks. '
+          'Recorded time will be preserved for your history and insights.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (confirmed != true) {
+    return;
+  }
+
+  await ref.read(taskControllerProvider.notifier).deleteTask(taskId);
 }
 
 class _CreateTaskDialog extends StatefulWidget {

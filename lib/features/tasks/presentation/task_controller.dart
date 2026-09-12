@@ -145,4 +145,37 @@ class TaskController extends AsyncNotifier<List<Task>> {
       state = AsyncError(ErrorHandler.handle(error, stackTrace), stackTrace);
     }
   }
+
+  Future<void> deleteTask(int id) async {
+    try {
+      final repository = ref.read(taskRepositoryProvider);
+
+      await repository.deleteTask(id);
+
+      AppLogger.info('Task deleted: $id');
+
+      state = AsyncData(await _loadTasks());
+
+      final user = ref.read(authRepositoryProvider).currentUser;
+      if (user != null) {
+        try {
+          await ref.read(taskSyncServiceProvider).syncTasks(user.uid);
+        } catch (error, stackTrace) {
+          AppLogger.error(
+            'Failed to sync deleted task',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+      }
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to delete task: $id',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      state = AsyncError(ErrorHandler.handle(error, stackTrace), stackTrace);
+    }
+  }
 }

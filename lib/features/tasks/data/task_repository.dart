@@ -140,4 +140,16 @@ class TaskRepository {
       ),
     );
   }
+
+  Future<void> deleteTask(int id) {
+    return (database.update(
+      database.tasks,
+    )..where((task) => task.id.equals(id))).write(
+      TasksCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+        syncStatus: Value(SyncStatus.pendingDelete.name),
+      ),
+    );
+  }
 }
