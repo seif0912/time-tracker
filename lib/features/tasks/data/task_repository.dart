@@ -152,4 +152,21 @@ class TaskRepository {
       ),
     );
   }
+
+  Future<void> updateTask({
+    required int id,
+    required String name,
+    String? description,
+  }) {
+    return (database.update(
+      database.tasks,
+    )..where((task) => task.id.equals(id))).write(
+      TasksCompanion(
+        name: Value(name),
+        description: Value(description),
+        updatedAt: Value(DateTime.now()),
+        syncStatus: Value(SyncStatus.pendingUpdate.name),
+      ),
+    );
+  }
 }

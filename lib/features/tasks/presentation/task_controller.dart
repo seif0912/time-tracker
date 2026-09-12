@@ -178,4 +178,54 @@ class TaskController extends AsyncNotifier<List<Task>> {
       state = AsyncError(ErrorHandler.handle(error, stackTrace), stackTrace);
     }
   }
+
+  Future<void> updateTask({
+    required int id,
+    required String name,
+    String? description,
+  }) async {
+    if (name.trim().isEmpty) {
+      state = AsyncError(
+        const ValidationException('Task name cannot be empty.'),
+        StackTrace.current,
+      );
+      return;
+    }
+
+    try {
+      final repository = ref.read(taskRepositoryProvider);
+
+      await repository.updateTask(
+        id: id,
+        name: name.trim(),
+        description: description?.trim(),
+      );
+
+      AppLogger.info('Task updated: $id');
+      AnalyticsService.instance.logEvent('task_updated');
+
+      state = AsyncData(await _loadTasks());
+
+      final user = ref.read(authRepositoryProvider).currentUser;
+      if (user != null) {
+        try {
+          await ref.read(taskSyncServiceProvider).syncTasks(user.uid);
+        } catch (error, stackTrace) {
+          AppLogger.error(
+            'Failed to sync updated task',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+      }
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to update task: $id',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      state = AsyncError(ErrorHandler.handle(error, stackTrace), stackTrace);
+    }
+  }
 }

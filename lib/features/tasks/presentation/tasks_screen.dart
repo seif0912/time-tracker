@@ -5,6 +5,7 @@ import '../../../core/widgets/widgets.dart';
 import '../../timer/domain/timer_state.dart';
 import '../../timer/presentation/timer_controller.dart';
 import 'task_controller.dart';
+import '../../../core/services/database/app_database.dart';
 
 class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
@@ -70,7 +71,10 @@ class TasksScreen extends ConsumerWidget {
                   child: AppCard(
                     padding: EdgeInsets.zero,
                     child: ListTile(
-                      title: Text(task.name),
+                      title: InkWell(
+                        onTap: () => _editTask(context, ref, task),
+                        child: Text(task.name),
+                      ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -256,6 +260,27 @@ Future<void> _confirmDelete(
   await ref.read(taskControllerProvider.notifier).deleteTask(taskId);
 }
 
+Future<void> _editTask(BuildContext context, WidgetRef ref, Task task) async {
+  final result = await showDialog<_TaskEditResult>(
+    context: context,
+    builder: (dialogContext) {
+      return _EditTaskDialog(task: task);
+    },
+  );
+
+  if (result == null) {
+    return;
+  }
+
+  await ref
+      .read(taskControllerProvider.notifier)
+      .updateTask(
+        id: task.id,
+        name: result.name,
+        description: result.description,
+      );
+}
+
 class _CreateTaskDialog extends StatefulWidget {
   const _CreateTaskDialog();
 
@@ -307,6 +332,93 @@ class _CreateTaskDialogState extends State<_CreateTaskDialog> {
           child: const Text('Cancel'),
         ),
         FilledButton(onPressed: _submit, child: const Text('Create')),
+      ],
+    );
+  }
+}
+
+class _TaskEditResult {
+  const _TaskEditResult({required this.name, this.description});
+
+  final String name;
+  final String? description;
+}
+
+class _EditTaskDialog extends StatefulWidget {
+  const _EditTaskDialog({required this.task});
+
+  final Task task;
+
+  @override
+  State<_EditTaskDialog> createState() => _EditTaskDialogState();
+}
+
+class _EditTaskDialogState extends State<_EditTaskDialog> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _nameController = TextEditingController(text: widget.task.name);
+    _descriptionController = TextEditingController(
+      text: widget.task.description ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final name = _nameController.text.trim();
+
+    if (name.isEmpty) {
+      return;
+    }
+
+    final description = _descriptionController.text.trim();
+
+    Navigator.of(context).pop(
+      _TaskEditResult(
+        name: name,
+        description: description.isEmpty ? null : description,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Edit task'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _nameController,
+            autofocus: true,
+            textInputAction: TextInputAction.next,
+            decoration: const InputDecoration(labelText: 'Name'),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _descriptionController,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(),
+            decoration: const InputDecoration(labelText: 'Description'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(onPressed: _submit, child: const Text('Save')),
       ],
     );
   }
