@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import '../../features/tasks/presentation/tasks_screen.dart';
 import '../../features/authentication/data/auth_providers.dart';
 import '../../features/authentication/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
@@ -51,6 +51,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/signup',
         builder: (context, state) {
           return const SignupScreen();
+        },
+      ),
+      GoRoute(
+        path: '/tasks',
+        builder: (context, state) {
+          return const TasksScreen();
         },
       ),
     ],

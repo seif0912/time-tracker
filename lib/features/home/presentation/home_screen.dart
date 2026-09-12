@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:go_router/go_router.dart';
 import '../../authentication/presentation/auth_controller.dart';
+import '../../authentication/data/auth_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -42,6 +43,14 @@ class HomeScreen extends ConsumerWidget {
               //   leading: const Icon(Icons.timer_outlined),
               //   title: const Text('Tasks'),
               // ),
+              ListTile(
+                leading: const Icon(Icons.timer_outlined),
+                title: const Text('Tasks'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.push('/tasks');
+                },
+              ),
               const Spacer(),
 
               const Divider(),
@@ -60,10 +69,17 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: const Center(
-        child: Text(
-          'Home',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Home',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(ref.read(authRepositoryProvider).currentUser?.email ?? ''),
+          ],
         ),
       ),
     );

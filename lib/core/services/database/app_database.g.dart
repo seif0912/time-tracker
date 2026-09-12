@@ -21,6 +21,25 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
+  @override
+  late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
+    'sync_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -52,6 +71,17 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _archivedMeta = const VerificationMeta(
     'archived',
   );
@@ -67,13 +97,40 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    syncId,
+    userId,
     name,
     description,
     createdAt,
+    updatedAt,
     archived,
+    syncStatus,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -89,6 +146,22 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('sync_id')) {
+      context.handle(
+        _syncIdMeta,
+        syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -115,10 +188,32 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
     if (data.containsKey('archived')) {
       context.handle(
         _archivedMeta,
         archived.isAcceptableOrUnknown(data['archived']!, _archivedMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
     return context;
@@ -134,6 +229,14 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      syncId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -146,10 +249,22 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
       archived: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}archived'],
       )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -161,39 +276,72 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
 
 class Task extends DataClass implements Insertable<Task> {
   final int id;
+
+  /// Globally unique identifier used for Firebase synchronization.
+  final String syncId;
+
+  /// Firebase Authentication UID that owns this task.
+  final String userId;
   final String name;
   final String? description;
   final DateTime createdAt;
+  final DateTime updatedAt;
   final bool archived;
+
+  /// One of the values from SyncStatus.
+  final String syncStatus;
+
+  /// Tombstone used when a task is deleted locally but still needs
+  /// to be deleted from Firebase.
+  final DateTime? deletedAt;
   const Task({
     required this.id,
+    required this.syncId,
+    required this.userId,
     required this.name,
     this.description,
     required this.createdAt,
+    required this.updatedAt,
     required this.archived,
+    required this.syncStatus,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    map['sync_id'] = Variable<String>(syncId);
+    map['user_id'] = Variable<String>(userId);
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
     map['archived'] = Variable<bool>(archived);
+    map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
   TasksCompanion toCompanion(bool nullToAbsent) {
     return TasksCompanion(
       id: Value(id),
+      syncId: Value(syncId),
+      userId: Value(userId),
       name: Value(name),
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
       createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
       archived: Value(archived),
+      syncStatus: Value(syncStatus),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -204,10 +352,15 @@ class Task extends DataClass implements Insertable<Task> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Task(
       id: serializer.fromJson<int>(json['id']),
+      syncId: serializer.fromJson<String>(json['syncId']),
+      userId: serializer.fromJson<String>(json['userId']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       archived: serializer.fromJson<bool>(json['archived']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -215,35 +368,57 @@ class Task extends DataClass implements Insertable<Task> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'syncId': serializer.toJson<String>(syncId),
+      'userId': serializer.toJson<String>(userId),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'archived': serializer.toJson<bool>(archived),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
   Task copyWith({
     int? id,
+    String? syncId,
+    String? userId,
     String? name,
     Value<String?> description = const Value.absent(),
     DateTime? createdAt,
+    DateTime? updatedAt,
     bool? archived,
+    String? syncStatus,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => Task(
     id: id ?? this.id,
+    syncId: syncId ?? this.syncId,
+    userId: userId ?? this.userId,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
     archived: archived ?? this.archived,
+    syncStatus: syncStatus ?? this.syncStatus,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   Task copyWithCompanion(TasksCompanion data) {
     return Task(
       id: data.id.present ? data.id.value : this.id,
+      syncId: data.syncId.present ? data.syncId.value : this.syncId,
+      userId: data.userId.present ? data.userId.value : this.userId,
       name: data.name.present ? data.name.value : this.name,
       description: data.description.present
           ? data.description.value
           : this.description,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       archived: data.archived.present ? data.archived.value : this.archived,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -251,77 +426,137 @@ class Task extends DataClass implements Insertable<Task> {
   String toString() {
     return (StringBuffer('Task(')
           ..write('id: $id, ')
+          ..write('syncId: $syncId, ')
+          ..write('userId: $userId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('createdAt: $createdAt, ')
-          ..write('archived: $archived')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('archived: $archived, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, createdAt, archived);
+  int get hashCode => Object.hash(
+    id,
+    syncId,
+    userId,
+    name,
+    description,
+    createdAt,
+    updatedAt,
+    archived,
+    syncStatus,
+    deletedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Task &&
           other.id == this.id &&
+          other.syncId == this.syncId &&
+          other.userId == this.userId &&
           other.name == this.name &&
           other.description == this.description &&
           other.createdAt == this.createdAt &&
-          other.archived == this.archived);
+          other.updatedAt == this.updatedAt &&
+          other.archived == this.archived &&
+          other.syncStatus == this.syncStatus &&
+          other.deletedAt == this.deletedAt);
 }
 
 class TasksCompanion extends UpdateCompanion<Task> {
   final Value<int> id;
+  final Value<String> syncId;
+  final Value<String> userId;
   final Value<String> name;
   final Value<String?> description;
   final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
   final Value<bool> archived;
+  final Value<String> syncStatus;
+  final Value<DateTime?> deletedAt;
   const TasksCompanion({
     this.id = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.userId = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.archived = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.deletedAt = const Value.absent(),
   });
   TasksCompanion.insert({
     this.id = const Value.absent(),
+    required String syncId,
+    required String userId,
     required String name,
     this.description = const Value.absent(),
     required DateTime createdAt,
+    required DateTime updatedAt,
     this.archived = const Value.absent(),
-  }) : name = Value(name),
-       createdAt = Value(createdAt);
+    required String syncStatus,
+    this.deletedAt = const Value.absent(),
+  }) : syncId = Value(syncId),
+       userId = Value(userId),
+       name = Value(name),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       syncStatus = Value(syncStatus);
   static Insertable<Task> custom({
     Expression<int>? id,
+    Expression<String>? syncId,
+    Expression<String>? userId,
     Expression<String>? name,
     Expression<String>? description,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<bool>? archived,
+    Expression<String>? syncStatus,
+    Expression<DateTime>? deletedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (syncId != null) 'sync_id': syncId,
+      if (userId != null) 'user_id': userId,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (archived != null) 'archived': archived,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (deletedAt != null) 'deleted_at': deletedAt,
     });
   }
 
   TasksCompanion copyWith({
     Value<int>? id,
+    Value<String>? syncId,
+    Value<String>? userId,
     Value<String>? name,
     Value<String?>? description,
     Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
     Value<bool>? archived,
+    Value<String>? syncStatus,
+    Value<DateTime?>? deletedAt,
   }) {
     return TasksCompanion(
       id: id ?? this.id,
+      syncId: syncId ?? this.syncId,
+      userId: userId ?? this.userId,
       name: name ?? this.name,
       description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       archived: archived ?? this.archived,
+      syncStatus: syncStatus ?? this.syncStatus,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 
@@ -330,6 +565,12 @@ class TasksCompanion extends UpdateCompanion<Task> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (syncId.present) {
+      map['sync_id'] = Variable<String>(syncId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -340,8 +581,17 @@ class TasksCompanion extends UpdateCompanion<Task> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
     if (archived.present) {
       map['archived'] = Variable<bool>(archived.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
     return map;
   }
@@ -350,10 +600,15 @@ class TasksCompanion extends UpdateCompanion<Task> {
   String toString() {
     return (StringBuffer('TasksCompanion(')
           ..write('id: $id, ')
+          ..write('syncId: $syncId, ')
+          ..write('userId: $userId, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('createdAt: $createdAt, ')
-          ..write('archived: $archived')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('archived: $archived, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
@@ -377,6 +632,25 @@ class $TimeEntriesTable extends TimeEntries
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
+  @override
+  late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
+    'sync_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _taskIdMeta = const VerificationMeta('taskId');
   @override
@@ -420,13 +694,63 @@ class $TimeEntriesTable extends TimeEntries
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    syncId,
+    userId,
     taskId,
     startedAt,
     endedAt,
     durationSeconds,
+    createdAt,
+    updatedAt,
+    syncStatus,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -442,6 +766,22 @@ class $TimeEntriesTable extends TimeEntries
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('sync_id')) {
+      context.handle(
+        _syncIdMeta,
+        syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
     }
     if (data.containsKey('task_id')) {
       context.handle(
@@ -474,6 +814,36 @@ class $TimeEntriesTable extends TimeEntries
         ),
       );
     }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -486,6 +856,14 @@ class $TimeEntriesTable extends TimeEntries
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
+      )!,
+      syncId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
       )!,
       taskId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -503,6 +881,22 @@ class $TimeEntriesTable extends TimeEntries
         DriftSqlType.int,
         data['${effectivePrefix}duration_seconds'],
       ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -514,21 +908,45 @@ class $TimeEntriesTable extends TimeEntries
 
 class TimeEntry extends DataClass implements Insertable<TimeEntry> {
   final int id;
+
+  /// Globally unique identifier used for Firebase synchronization.
+  final String syncId;
+
+  /// Firebase Authentication UID that owns this time entry.
+  final String userId;
+
+  /// Local Task ID.
   final int taskId;
   final DateTime startedAt;
   final DateTime? endedAt;
   final int? durationSeconds;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  /// One of the values from SyncStatus.
+  final String syncStatus;
+
+  /// Tombstone used when a time entry is deleted locally.
+  final DateTime? deletedAt;
   const TimeEntry({
     required this.id,
+    required this.syncId,
+    required this.userId,
     required this.taskId,
     required this.startedAt,
     this.endedAt,
     this.durationSeconds,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.syncStatus,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    map['sync_id'] = Variable<String>(syncId);
+    map['user_id'] = Variable<String>(userId);
     map['task_id'] = Variable<int>(taskId);
     map['started_at'] = Variable<DateTime>(startedAt);
     if (!nullToAbsent || endedAt != null) {
@@ -537,12 +955,20 @@ class TimeEntry extends DataClass implements Insertable<TimeEntry> {
     if (!nullToAbsent || durationSeconds != null) {
       map['duration_seconds'] = Variable<int>(durationSeconds);
     }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
   TimeEntriesCompanion toCompanion(bool nullToAbsent) {
     return TimeEntriesCompanion(
       id: Value(id),
+      syncId: Value(syncId),
+      userId: Value(userId),
       taskId: Value(taskId),
       startedAt: Value(startedAt),
       endedAt: endedAt == null && nullToAbsent
@@ -551,6 +977,12 @@ class TimeEntry extends DataClass implements Insertable<TimeEntry> {
       durationSeconds: durationSeconds == null && nullToAbsent
           ? const Value.absent()
           : Value(durationSeconds),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      syncStatus: Value(syncStatus),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -561,10 +993,16 @@ class TimeEntry extends DataClass implements Insertable<TimeEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TimeEntry(
       id: serializer.fromJson<int>(json['id']),
+      syncId: serializer.fromJson<String>(json['syncId']),
+      userId: serializer.fromJson<String>(json['userId']),
       taskId: serializer.fromJson<int>(json['taskId']),
       startedAt: serializer.fromJson<DateTime>(json['startedAt']),
       endedAt: serializer.fromJson<DateTime?>(json['endedAt']),
       durationSeconds: serializer.fromJson<int?>(json['durationSeconds']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -572,37 +1010,63 @@ class TimeEntry extends DataClass implements Insertable<TimeEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'syncId': serializer.toJson<String>(syncId),
+      'userId': serializer.toJson<String>(userId),
       'taskId': serializer.toJson<int>(taskId),
       'startedAt': serializer.toJson<DateTime>(startedAt),
       'endedAt': serializer.toJson<DateTime?>(endedAt),
       'durationSeconds': serializer.toJson<int?>(durationSeconds),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
   TimeEntry copyWith({
     int? id,
+    String? syncId,
+    String? userId,
     int? taskId,
     DateTime? startedAt,
     Value<DateTime?> endedAt = const Value.absent(),
     Value<int?> durationSeconds = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? syncStatus,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => TimeEntry(
     id: id ?? this.id,
+    syncId: syncId ?? this.syncId,
+    userId: userId ?? this.userId,
     taskId: taskId ?? this.taskId,
     startedAt: startedAt ?? this.startedAt,
     endedAt: endedAt.present ? endedAt.value : this.endedAt,
     durationSeconds: durationSeconds.present
         ? durationSeconds.value
         : this.durationSeconds,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    syncStatus: syncStatus ?? this.syncStatus,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   TimeEntry copyWithCompanion(TimeEntriesCompanion data) {
     return TimeEntry(
       id: data.id.present ? data.id.value : this.id,
+      syncId: data.syncId.present ? data.syncId.value : this.syncId,
+      userId: data.userId.present ? data.userId.value : this.userId,
       taskId: data.taskId.present ? data.taskId.value : this.taskId,
       startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
       endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
       durationSeconds: data.durationSeconds.present
           ? data.durationSeconds.value
           : this.durationSeconds,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -610,78 +1074,148 @@ class TimeEntry extends DataClass implements Insertable<TimeEntry> {
   String toString() {
     return (StringBuffer('TimeEntry(')
           ..write('id: $id, ')
+          ..write('syncId: $syncId, ')
+          ..write('userId: $userId, ')
           ..write('taskId: $taskId, ')
           ..write('startedAt: $startedAt, ')
           ..write('endedAt: $endedAt, ')
-          ..write('durationSeconds: $durationSeconds')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, taskId, startedAt, endedAt, durationSeconds);
+  int get hashCode => Object.hash(
+    id,
+    syncId,
+    userId,
+    taskId,
+    startedAt,
+    endedAt,
+    durationSeconds,
+    createdAt,
+    updatedAt,
+    syncStatus,
+    deletedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TimeEntry &&
           other.id == this.id &&
+          other.syncId == this.syncId &&
+          other.userId == this.userId &&
           other.taskId == this.taskId &&
           other.startedAt == this.startedAt &&
           other.endedAt == this.endedAt &&
-          other.durationSeconds == this.durationSeconds);
+          other.durationSeconds == this.durationSeconds &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.syncStatus == this.syncStatus &&
+          other.deletedAt == this.deletedAt);
 }
 
 class TimeEntriesCompanion extends UpdateCompanion<TimeEntry> {
   final Value<int> id;
+  final Value<String> syncId;
+  final Value<String> userId;
   final Value<int> taskId;
   final Value<DateTime> startedAt;
   final Value<DateTime?> endedAt;
   final Value<int?> durationSeconds;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<String> syncStatus;
+  final Value<DateTime?> deletedAt;
   const TimeEntriesCompanion({
     this.id = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.userId = const Value.absent(),
     this.taskId = const Value.absent(),
     this.startedAt = const Value.absent(),
     this.endedAt = const Value.absent(),
     this.durationSeconds = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.deletedAt = const Value.absent(),
   });
   TimeEntriesCompanion.insert({
     this.id = const Value.absent(),
+    required String syncId,
+    required String userId,
     required int taskId,
     required DateTime startedAt,
     this.endedAt = const Value.absent(),
     this.durationSeconds = const Value.absent(),
-  }) : taskId = Value(taskId),
-       startedAt = Value(startedAt);
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    required String syncStatus,
+    this.deletedAt = const Value.absent(),
+  }) : syncId = Value(syncId),
+       userId = Value(userId),
+       taskId = Value(taskId),
+       startedAt = Value(startedAt),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       syncStatus = Value(syncStatus);
   static Insertable<TimeEntry> custom({
     Expression<int>? id,
+    Expression<String>? syncId,
+    Expression<String>? userId,
     Expression<int>? taskId,
     Expression<DateTime>? startedAt,
     Expression<DateTime>? endedAt,
     Expression<int>? durationSeconds,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? syncStatus,
+    Expression<DateTime>? deletedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (syncId != null) 'sync_id': syncId,
+      if (userId != null) 'user_id': userId,
       if (taskId != null) 'task_id': taskId,
       if (startedAt != null) 'started_at': startedAt,
       if (endedAt != null) 'ended_at': endedAt,
       if (durationSeconds != null) 'duration_seconds': durationSeconds,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (deletedAt != null) 'deleted_at': deletedAt,
     });
   }
 
   TimeEntriesCompanion copyWith({
     Value<int>? id,
+    Value<String>? syncId,
+    Value<String>? userId,
     Value<int>? taskId,
     Value<DateTime>? startedAt,
     Value<DateTime?>? endedAt,
     Value<int?>? durationSeconds,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<String>? syncStatus,
+    Value<DateTime?>? deletedAt,
   }) {
     return TimeEntriesCompanion(
       id: id ?? this.id,
+      syncId: syncId ?? this.syncId,
+      userId: userId ?? this.userId,
       taskId: taskId ?? this.taskId,
       startedAt: startedAt ?? this.startedAt,
       endedAt: endedAt ?? this.endedAt,
       durationSeconds: durationSeconds ?? this.durationSeconds,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 
@@ -690,6 +1224,12 @@ class TimeEntriesCompanion extends UpdateCompanion<TimeEntry> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (syncId.present) {
+      map['sync_id'] = Variable<String>(syncId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
     }
     if (taskId.present) {
       map['task_id'] = Variable<int>(taskId.value);
@@ -703,6 +1243,18 @@ class TimeEntriesCompanion extends UpdateCompanion<TimeEntry> {
     if (durationSeconds.present) {
       map['duration_seconds'] = Variable<int>(durationSeconds.value);
     }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     return map;
   }
 
@@ -710,10 +1262,16 @@ class TimeEntriesCompanion extends UpdateCompanion<TimeEntry> {
   String toString() {
     return (StringBuffer('TimeEntriesCompanion(')
           ..write('id: $id, ')
+          ..write('syncId: $syncId, ')
+          ..write('userId: $userId, ')
           ..write('taskId: $taskId, ')
           ..write('startedAt: $startedAt, ')
           ..write('endedAt: $endedAt, ')
-          ..write('durationSeconds: $durationSeconds')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
@@ -1209,18 +1767,28 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$TasksTableCreateCompanionBuilder =
     TasksCompanion Function({
       Value<int> id,
+      required String syncId,
+      required String userId,
       required String name,
       Value<String?> description,
       required DateTime createdAt,
+      required DateTime updatedAt,
       Value<bool> archived,
+      required String syncStatus,
+      Value<DateTime?> deletedAt,
     });
 typedef $$TasksTableUpdateCompanionBuilder =
     TasksCompanion Function({
       Value<int> id,
+      Value<String> syncId,
+      Value<String> userId,
       Value<String> name,
       Value<String?> description,
       Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
       Value<bool> archived,
+      Value<String> syncStatus,
+      Value<DateTime?> deletedAt,
     });
 
 class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
@@ -1233,6 +1801,16 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1251,8 +1829,23 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<bool> get archived => $composableBuilder(
     column: $table.archived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1271,6 +1864,16 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
@@ -1286,8 +1889,23 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get archived => $composableBuilder(
     column: $table.archived,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -1304,6 +1922,12 @@ class $$TasksTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get syncId =>
+      $composableBuilder(column: $table.syncId, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
@@ -1315,8 +1939,19 @@ class $$TasksTableAnnotationComposer
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
   GeneratedColumn<bool> get archived =>
       $composableBuilder(column: $table.archived, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$TasksTableTableManager
@@ -1348,30 +1983,50 @@ class $$TasksTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String> syncId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> archived = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
               }) => TasksCompanion(
                 id: id,
+                syncId: syncId,
+                userId: userId,
                 name: name,
                 description: description,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 archived: archived,
+                syncStatus: syncStatus,
+                deletedAt: deletedAt,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                required String syncId,
+                required String userId,
                 required String name,
                 Value<String?> description = const Value.absent(),
                 required DateTime createdAt,
+                required DateTime updatedAt,
                 Value<bool> archived = const Value.absent(),
+                required String syncStatus,
+                Value<DateTime?> deletedAt = const Value.absent(),
               }) => TasksCompanion.insert(
                 id: id,
+                syncId: syncId,
+                userId: userId,
                 name: name,
                 description: description,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 archived: archived,
+                syncStatus: syncStatus,
+                deletedAt: deletedAt,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -1398,18 +2053,30 @@ typedef $$TasksTableProcessedTableManager =
 typedef $$TimeEntriesTableCreateCompanionBuilder =
     TimeEntriesCompanion Function({
       Value<int> id,
+      required String syncId,
+      required String userId,
       required int taskId,
       required DateTime startedAt,
       Value<DateTime?> endedAt,
       Value<int?> durationSeconds,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      required String syncStatus,
+      Value<DateTime?> deletedAt,
     });
 typedef $$TimeEntriesTableUpdateCompanionBuilder =
     TimeEntriesCompanion Function({
       Value<int> id,
+      Value<String> syncId,
+      Value<String> userId,
       Value<int> taskId,
       Value<DateTime> startedAt,
       Value<DateTime?> endedAt,
       Value<int?> durationSeconds,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<String> syncStatus,
+      Value<DateTime?> deletedAt,
     });
 
 class $$TimeEntriesTableFilterComposer
@@ -1423,6 +2090,16 @@ class $$TimeEntriesTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1445,6 +2122,26 @@ class $$TimeEntriesTableFilterComposer
     column: $table.durationSeconds,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$TimeEntriesTableOrderingComposer
@@ -1458,6 +2155,16 @@ class $$TimeEntriesTableOrderingComposer
   });
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -1480,6 +2187,26 @@ class $$TimeEntriesTableOrderingComposer
     column: $table.durationSeconds,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TimeEntriesTableAnnotationComposer
@@ -1494,6 +2221,12 @@ class $$TimeEntriesTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get syncId =>
+      $composableBuilder(column: $table.syncId, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
   GeneratedColumn<int> get taskId =>
       $composableBuilder(column: $table.taskId, builder: (column) => column);
 
@@ -1507,6 +2240,20 @@ class $$TimeEntriesTableAnnotationComposer
     column: $table.durationSeconds,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$TimeEntriesTableTableManager
@@ -1541,30 +2288,54 @@ class $$TimeEntriesTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String> syncId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
                 Value<int> taskId = const Value.absent(),
                 Value<DateTime> startedAt = const Value.absent(),
                 Value<DateTime?> endedAt = const Value.absent(),
                 Value<int?> durationSeconds = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
               }) => TimeEntriesCompanion(
                 id: id,
+                syncId: syncId,
+                userId: userId,
                 taskId: taskId,
                 startedAt: startedAt,
                 endedAt: endedAt,
                 durationSeconds: durationSeconds,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                syncStatus: syncStatus,
+                deletedAt: deletedAt,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                required String syncId,
+                required String userId,
                 required int taskId,
                 required DateTime startedAt,
                 Value<DateTime?> endedAt = const Value.absent(),
                 Value<int?> durationSeconds = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                required String syncStatus,
+                Value<DateTime?> deletedAt = const Value.absent(),
               }) => TimeEntriesCompanion.insert(
                 id: id,
+                syncId: syncId,
+                userId: userId,
                 taskId: taskId,
                 startedAt: startedAt,
                 endedAt: endedAt,
                 durationSeconds: durationSeconds,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                syncStatus: syncStatus,
+                deletedAt: deletedAt,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

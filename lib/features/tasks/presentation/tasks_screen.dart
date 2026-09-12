@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/widgets.dart';
+import '../../timer/domain/timer_state.dart';
+import '../../timer/presentation/timer_controller.dart';
 import 'task_controller.dart';
 
 class TasksScreen extends ConsumerWidget {
@@ -10,6 +12,7 @@ class TasksScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(taskControllerProvider);
+    final timerState = ref.watch(timerControllerProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Tasks')),
@@ -21,7 +24,6 @@ class TasksScreen extends ConsumerWidget {
         loading: () {
           return const AppLoading(message: 'Loading tasks...');
         },
-
         error: (error, stackTrace) {
           return AppEmptyState(
             icon: Icons.error_outline_rounded,
@@ -37,7 +39,6 @@ class TasksScreen extends ConsumerWidget {
             ),
           );
         },
-
         data: (taskList) {
           if (taskList.isEmpty) {
             return AppEmptyState(
@@ -54,34 +55,143 @@ class TasksScreen extends ConsumerWidget {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: taskList.length,
-            itemBuilder: (context, index) {
-              final task = taskList[index];
+          return RefreshIndicator(
+            onRefresh: () =>
+                ref.read(taskControllerProvider.notifier).refresh(),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: taskList.length,
+              itemBuilder: (context, index) {
+                final task = taskList[index];
+                final session = timerState.sessionForTask(task.id);
 
-              return AppCard(
-                padding: EdgeInsets.zero,
-                child: ListTile(
-                  title: Text(task.name),
-                  subtitle: task.description == null
-                      ? null
-                      : Text(task.description!),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.archive_outlined),
-                    onPressed: () {
-                      ref
-                          .read(taskControllerProvider.notifier)
-                          .archiveTask(task.id);
-                    },
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: AppCard(
+                    padding: EdgeInsets.zero,
+                    child: ListTile(
+                      title: Text(task.name),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (task.description != null) Text(task.description!),
+                          if (session != null) ...[
+                            const SizedBox(height: 4),
+                            Text(_formatDuration(session.totalElapsedSeconds)),
+                          ],
+                        ],
+                      ),
+                      trailing: _buildTimerControls(
+                        ref,
+                        task.id,
+                        session,
+                        timerState,
+                      ),
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),
     );
+  }
+
+  Widget _buildTimerControls(
+    WidgetRef ref,
+    int taskId,
+    TimerSessionState? session,
+    TimerState timerState,
+  ) {
+    final controller = ref.read(timerControllerProvider.notifier);
+
+    // No session for this task.
+    if (session == null) {
+      final hasRunningSession = timerState.hasRunningSession;
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            tooltip: hasRunningSession
+                ? 'Another timer is running'
+                : 'Start timer',
+            icon: const Icon(Icons.play_arrow_rounded),
+            onPressed: hasRunningSession
+                ? null
+                : () {
+                    controller.start(taskId: taskId);
+                  },
+          ),
+          IconButton(
+            tooltip: 'Archive',
+            icon: const Icon(Icons.archive_outlined),
+            onPressed: () {
+              ref.read(taskControllerProvider.notifier).archiveTask(taskId);
+            },
+          ),
+        ],
+      );
+    }
+
+    // This task is currently running.
+    if (session.status == TimerStatus.running) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            tooltip: 'Pause',
+            icon: const Icon(Icons.pause_rounded),
+            onPressed: () {
+              controller.pause(taskId);
+            },
+          ),
+          IconButton(
+            tooltip: 'Stop',
+            icon: const Icon(Icons.stop_rounded),
+            onPressed: () async {
+              await controller.stop(taskId);
+            },
+          ),
+        ],
+      );
+    }
+
+    // This task is paused.
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          tooltip: 'Resume',
+          icon: const Icon(Icons.play_arrow_rounded),
+          onPressed: timerState.hasRunningSession
+              ? null
+              : () {
+                  controller.resume(taskId);
+                },
+        ),
+        IconButton(
+          tooltip: 'Stop',
+          icon: const Icon(Icons.stop_rounded),
+          onPressed: () async {
+            await controller.stop(taskId);
+          },
+        ),
+      ],
+    );
+  }
+
+  String _formatDuration(int seconds) {
+    final duration = Duration(seconds: seconds);
+
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final remainingSeconds = duration.inSeconds.remainder(60);
+
+    return '${hours.toString().padLeft(2, '0')}:'
+        '${minutes.toString().padLeft(2, '0')}:'
+        '${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
   Future<void> _createTask(BuildContext context, WidgetRef ref) async {
@@ -115,14 +225,12 @@ class _CreateTaskDialogState extends State<_CreateTaskDialog> {
   @override
   void initState() {
     super.initState();
-
     _controller = TextEditingController();
   }
 
   @override
   void dispose() {
     _controller.dispose();
-
     super.dispose();
   }
 

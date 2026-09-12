@@ -3,6 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:time_tracker/app/app.dart';
 import 'package:time_tracker/core/config/app_environment.dart';
+import 'package:time_tracker/features/authentication/domain/auth_state.dart';
+import 'package:time_tracker/features/authentication/presentation/auth_controller.dart';
+
+class FakeAuthController extends AuthController {
+  @override
+  AuthState build() {
+    return const AuthState(status: AuthStatus.unauthenticated);
+  }
+}
 
 void main() {
   testWidgets('Time Tracker app loads', (tester) async {
@@ -12,7 +21,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      ProviderScope(child: TimeTrackerApp(config: config)),
+      ProviderScope(
+        overrides: [
+          authControllerProvider.overrideWith(FakeAuthController.new),
+        ],
+        child: TimeTrackerApp(config: config),
+      ),
     );
 
     await tester.pump();
