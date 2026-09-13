@@ -228,4 +228,59 @@ class TaskController extends AsyncNotifier<List<Task>> {
       state = AsyncError(ErrorHandler.handle(error, stackTrace), stackTrace);
     }
   }
+
+  Future<void> restoreTask(int id) async {
+    try {
+      final repository = ref.read(taskRepositoryProvider);
+
+      await repository.restoreTask(id);
+
+      AppLogger.info('Task restored: $id');
+      AnalyticsService.instance.logEvent('task_restored');
+
+      state = AsyncData(await _loadTasks());
+
+      final user = ref.read(authRepositoryProvider).currentUser;
+      if (user != null) {
+        try {
+          await ref.read(taskSyncServiceProvider).syncTasks(user.uid);
+        } catch (error, stackTrace) {
+          AppLogger.error(
+            'Failed to sync restored task',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+      }
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to restore task: $id',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      state = AsyncError(ErrorHandler.handle(error, stackTrace), stackTrace);
+    }
+  }
+
+  Future<List<Task>> getArchivedTasks() async {
+    final user = ref.read(authRepositoryProvider).currentUser;
+
+    if (user == null) {
+      return [];
+    }
+
+    try {
+      final repository = ref.read(taskRepositoryProvider);
+      return await repository.getArchivedTasks(user.uid);
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to load archived tasks',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      throw ErrorHandler.handle(error, stackTrace);
+    }
+  }
 }

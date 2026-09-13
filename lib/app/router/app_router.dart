@@ -4,6 +4,7 @@ import '../../features/tasks/presentation/tasks_screen.dart';
 import '../../features/authentication/data/auth_providers.dart';
 import '../../features/authentication/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/tasks/presentation/archived_tasks_screen.dart';
 import '../../features/authentication/presentation/signup_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -58,6 +59,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return const TasksScreen();
         },
+      ),
+      GoRoute(
+        path: '/archived-tasks',
+        builder: (context, state) => const ArchivedTasksScreen(),
       ),
     ],
   );

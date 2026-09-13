@@ -169,4 +169,33 @@ class TaskRepository {
       ),
     );
   }
+
+  Future<List<Task>> getArchivedTasks(String userId) {
+    return (database.select(database.tasks)
+          ..where(
+            (task) =>
+                task.userId.equals(userId) &
+                task.archived.equals(true) &
+                task.deletedAt.isNull(),
+          )
+          ..orderBy([
+            (task) => OrderingTerm(
+              expression: task.updatedAt,
+              mode: OrderingMode.desc,
+            ),
+          ]))
+        .get();
+  }
+
+  Future<void> restoreTask(int id) {
+    return (database.update(
+      database.tasks,
+    )..where((task) => task.id.equals(id))).write(
+      TasksCompanion(
+        archived: const Value(false),
+        updatedAt: Value(DateTime.now()),
+        syncStatus: Value(SyncStatus.pendingUpdate.name),
+      ),
+    );
+  }
 }

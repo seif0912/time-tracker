@@ -6,6 +6,8 @@ import '../../timer/domain/timer_state.dart';
 import '../../timer/presentation/timer_controller.dart';
 import 'task_controller.dart';
 import '../../../core/services/database/app_database.dart';
+import 'task_list_provider.dart';
+import '../domain/task_sort_order.dart';
 
 class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
@@ -13,10 +15,52 @@ class TasksScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(taskControllerProvider);
+    final filteredTasks = ref.watch(filteredTasksProvider);
     final timerState = ref.watch(timerControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tasks')),
+      appBar: AppBar(
+        title: const Text('Tasks'),
+        actions: [
+          IconButton(
+            tooltip: 'Sort tasks',
+            icon: const Icon(Icons.sort),
+            onPressed: () => _showSortOptions(context, ref),
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(64),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: TextField(
+              onChanged: (query) {
+                ref
+                    .read(taskListViewControllerProvider.notifier)
+                    .setSearchQuery(query);
+              },
+              decoration: InputDecoration(
+                hintText: 'Search tasks...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon:
+                    ref
+                        .watch(taskListViewControllerProvider)
+                        .searchQuery
+                        .isNotEmpty
+                    ? IconButton(
+                        tooltip: 'Clear search',
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          ref
+                              .read(taskListViewControllerProvider.notifier)
+                              .clearSearch();
+                        },
+                      )
+                    : null,
+              ),
+            ),
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _createTask(context, ref),
         child: const Icon(Icons.add),
@@ -40,8 +84,31 @@ class TasksScreen extends ConsumerWidget {
             ),
           );
         },
-        data: (taskList) {
-          if (taskList.isEmpty) {
+        data: (_) {
+          if (filteredTasks.isEmpty) {
+            final searchQuery = ref
+                .read(taskListViewControllerProvider)
+                .searchQuery
+                .trim();
+
+            if (searchQuery.isNotEmpty) {
+              return AppEmptyState(
+                icon: Icons.search_off_rounded,
+                title: 'No matching tasks',
+                description: 'Try a different search term.',
+                action: AppButton(
+                  label: 'Clear Search',
+                  icon: Icons.clear,
+                  expanded: false,
+                  onPressed: () {
+                    ref
+                        .read(taskListViewControllerProvider.notifier)
+                        .clearSearch();
+                  },
+                ),
+              );
+            }
+
             return AppEmptyState(
               icon: Icons.task_alt_rounded,
               title: 'No tasks yet',
@@ -61,9 +128,9 @@ class TasksScreen extends ConsumerWidget {
                 ref.read(taskControllerProvider.notifier).refresh(),
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: taskList.length,
+              itemCount: filteredTasks.length,
               itemBuilder: (context, index) {
-                final task = taskList[index];
+                final task = filteredTasks[index];
                 final session = timerState.sessionForTask(task.id);
 
                 return Padding(
@@ -421,5 +488,54 @@ class _EditTaskDialogState extends State<_EditTaskDialog> {
         FilledButton(onPressed: _submit, child: const Text('Save')),
       ],
     );
+  }
+}
+
+void _showSortOptions(BuildContext context, WidgetRef ref) {
+  final currentSort = ref.read(taskListViewControllerProvider).sortOrder;
+
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (context) {
+      return SafeArea(
+        child: RadioGroup<TaskSortOrder>(
+          groupValue: currentSort,
+          onChanged: (value) {
+            if (value == null) return;
+
+            ref
+                .read(taskListViewControllerProvider.notifier)
+                .setSortOrder(value);
+
+            Navigator.of(context).pop();
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: TaskSortOrder.values.map((sortOrder) {
+              return RadioListTile<TaskSortOrder>(
+                title: Text(_sortOrderLabel(sortOrder)),
+                value: sortOrder,
+              );
+            }).toList(),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+String _sortOrderLabel(TaskSortOrder sortOrder) {
+  switch (sortOrder) {
+    case TaskSortOrder.newest:
+      return 'Newest first';
+
+    case TaskSortOrder.oldest:
+      return 'Oldest first';
+
+    case TaskSortOrder.nameAscending:
+      return 'Name A–Z';
+
+    case TaskSortOrder.nameDescending:
+      return 'Name Z–A';
   }
 }

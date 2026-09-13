@@ -51,6 +51,14 @@ class HomeScreen extends ConsumerWidget {
                   context.push('/tasks');
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.archive_outlined),
+                title: const Text('Archived Tasks'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.push('/archived-tasks');
+                },
+              ),
               const Spacer(),
 
               const Divider(),
