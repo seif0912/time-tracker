@@ -1,18 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../authentication/presentation/auth_controller.dart';
-import '../../authentication/data/auth_providers.dart';
 
-class HomeScreen extends ConsumerWidget {
+// import '../../authentication/data/auth_providers.dart';
+import '../../authentication/presentation/auth_controller.dart';
+import '../../dashboard/presentation/dashboard_controller.dart';
+import '../../dashboard/presentation/dashboard_screen.dart';
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
-  Future<void> _logout(WidgetRef ref) async {
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      ref.invalidate(dashboardControllerProvider);
+    });
+  }
+
+  Future<void> _logout() async {
     await ref.read(authControllerProvider.notifier).signOut();
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('TimeTracker')),
       drawer: Drawer(
@@ -34,15 +51,10 @@ class HomeScreen extends ConsumerWidget {
                 selected: true,
                 onTap: () {
                   Navigator.of(context).pop();
+                  ref.invalidate(dashboardControllerProvider);
                 },
               ),
 
-              // Future navigation items will go here.
-              //
-              // ListTile(
-              //   leading: const Icon(Icons.timer_outlined),
-              //   title: const Text('Tasks'),
-              // ),
               ListTile(
                 leading: const Icon(Icons.timer_outlined),
                 title: const Text('Tasks'),
@@ -51,6 +63,7 @@ class HomeScreen extends ConsumerWidget {
                   context.push('/tasks');
                 },
               ),
+
               ListTile(
                 leading: const Icon(Icons.archive_outlined),
                 title: const Text('Archived Tasks'),
@@ -59,6 +72,16 @@ class HomeScreen extends ConsumerWidget {
                   context.push('/archived-tasks');
                 },
               ),
+
+              ListTile(
+                leading: const Icon(Icons.history_rounded),
+                title: const Text('History'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.push('/history');
+                },
+              ),
+
               const Spacer(),
 
               const Divider(),
@@ -68,7 +91,7 @@ class HomeScreen extends ConsumerWidget {
                 title: const Text('Log out'),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  await _logout(ref);
+                  await _logout();
                 },
               ),
 
@@ -77,19 +100,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Home',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(ref.read(authRepositoryProvider).currentUser?.email ?? ''),
-          ],
-        ),
-      ),
+      body: const DashboardScreen(),
     );
   }
 }

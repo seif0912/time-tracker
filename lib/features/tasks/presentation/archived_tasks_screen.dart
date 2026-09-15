@@ -4,11 +4,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'archived_tasks_provider.dart';
 import 'task_controller.dart';
 
-class ArchivedTasksScreen extends ConsumerWidget {
+class ArchivedTasksScreen extends ConsumerStatefulWidget {
   const ArchivedTasksScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ArchivedTasksScreen> createState() =>
+      _ArchivedTasksScreenState();
+}
+
+class _ArchivedTasksScreenState extends ConsumerState<ArchivedTasksScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      ref.invalidate(archivedTasksProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final archivedTasks = ref.watch(archivedTasksProvider);
 
     return Scaffold(

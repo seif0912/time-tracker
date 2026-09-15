@@ -9,11 +9,25 @@ import '../../../core/services/database/app_database.dart';
 import 'task_list_provider.dart';
 import '../domain/task_sort_order.dart';
 
-class TasksScreen extends ConsumerWidget {
+class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TasksScreen> createState() => _TasksScreenState();
+}
+
+class _TasksScreenState extends ConsumerState<TasksScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      ref.invalidate(taskControllerProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final tasks = ref.watch(taskControllerProvider);
     final filteredTasks = ref.watch(filteredTasksProvider);
     final timerState = ref.watch(timerControllerProvider);

@@ -6,6 +6,8 @@ import '../../features/authentication/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/tasks/presentation/archived_tasks_screen.dart';
 import '../../features/authentication/presentation/signup_screen.dart';
+import '../../features/timer/presentation/history_screen.dart';
+import '../../features/dashboard/presentation/dashboard_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateChangesProvider);
@@ -63,6 +65,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/archived-tasks',
         builder: (context, state) => const ArchivedTasksScreen(),
+      ),
+      GoRoute(
+        path: '/history',
+        builder: (context, state) => const HistoryScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) => const DashboardScreen(),
       ),
     ],
   );
