@@ -11,6 +11,7 @@ import '../logging/app_logger.dart';
 import 'connectivity_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../features/tasks/presentation/task_controller.dart';
+import '../../features/dashboard/presentation/dashboard_controller.dart';
 
 final syncControllerProvider = AsyncNotifierProvider<SyncController, void>(
   SyncController.new,
@@ -80,6 +81,7 @@ class SyncController extends AsyncNotifier<void> with WidgetsBindingObserver {
       await ref.read(timeEntrySyncServiceProvider).syncTimeEntries(user.uid);
 
       ref.invalidate(taskControllerProvider);
+      ref.invalidate(dashboardControllerProvider);
     } catch (error, stackTrace) {
       AppLogger.error(
         'Synchronization failed',

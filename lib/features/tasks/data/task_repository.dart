@@ -98,6 +98,7 @@ class TaskRepository {
     required DateTime createdAt,
     required DateTime updatedAt,
     required bool archived,
+    required bool favorite,
     DateTime? deletedAt,
   }) async {
     await database
@@ -111,6 +112,7 @@ class TaskRepository {
             createdAt: createdAt,
             updatedAt: updatedAt,
             archived: Value(archived),
+            favorite: Value(favorite),
             syncStatus: SyncStatus.synced.name,
             deletedAt: Value(deletedAt),
           ),
@@ -124,6 +126,7 @@ class TaskRepository {
     required DateTime createdAt,
     required DateTime updatedAt,
     required bool archived,
+    required bool favorite,
     DateTime? deletedAt,
   }) async {
     await (database.update(
@@ -135,6 +138,7 @@ class TaskRepository {
         createdAt: Value(createdAt),
         updatedAt: Value(updatedAt),
         archived: Value(archived),
+        favorite: Value(favorite),
         deletedAt: Value(deletedAt),
         syncStatus: Value(SyncStatus.synced.name),
       ),
@@ -193,6 +197,24 @@ class TaskRepository {
     )..where((task) => task.id.equals(id))).write(
       TasksCompanion(
         archived: const Value(false),
+        updatedAt: Value(DateTime.now()),
+        syncStatus: Value(SyncStatus.pendingUpdate.name),
+      ),
+    );
+  }
+
+  Future<void> toggleFavorite(int id) async {
+    final task = await getTaskById(id);
+
+    if (task == null) {
+      throw StateError('Task not found.');
+    }
+
+    await (database.update(
+      database.tasks,
+    )..where((task) => task.id.equals(id))).write(
+      TasksCompanion(
+        favorite: Value(!task.favorite),
         updatedAt: Value(DateTime.now()),
         syncStatus: Value(SyncStatus.pendingUpdate.name),
       ),

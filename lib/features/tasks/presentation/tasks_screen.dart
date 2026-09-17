@@ -166,12 +166,32 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           ],
                         ],
                       ),
-                      trailing: _buildTimerControls(
-                        context,
-                        ref,
-                        task.id,
-                        session,
-                        timerState,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: task.favorite
+                                ? 'Remove from favorites'
+                                : 'Add to favorites',
+                            icon: Icon(
+                              task.favorite
+                                  ? Icons.star_rounded
+                                  : Icons.star_border_rounded,
+                            ),
+                            onPressed: () {
+                              ref
+                                  .read(taskControllerProvider.notifier)
+                                  .toggleFavorite(task.id);
+                            },
+                          ),
+                          _buildTimerControls(
+                            context,
+                            ref,
+                            task.id,
+                            session,
+                            timerState,
+                          ),
+                        ],
                       ),
                     ),
                   ),

@@ -6,7 +6,7 @@ import 'time_entry_sync_service.dart';
 
 final timeEntrySyncServiceProvider = Provider<TimeEntrySyncService>((ref) {
   return TimeEntrySyncService(
-    timeEntryRepository: ref.read(timeEntryRepositoryProvider),
-    taskRepository: ref.read(taskRepositoryProvider),
+    timeEntryRepository: ref.watch(timeEntryRepositoryProvider),
+    taskRepository: ref.watch(taskRepositoryProvider),
   );
 });

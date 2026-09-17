@@ -97,6 +97,21 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _favoriteMeta = const VerificationMeta(
+    'favorite',
+  );
+  @override
+  late final GeneratedColumn<bool> favorite = GeneratedColumn<bool>(
+    'favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _syncStatusMeta = const VerificationMeta(
     'syncStatus',
   );
@@ -129,6 +144,7 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     createdAt,
     updatedAt,
     archived,
+    favorite,
     syncStatus,
     deletedAt,
   ];
@@ -202,6 +218,12 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         archived.isAcceptableOrUnknown(data['archived']!, _archivedMeta),
       );
     }
+    if (data.containsKey('favorite')) {
+      context.handle(
+        _favoriteMeta,
+        favorite.isAcceptableOrUnknown(data['favorite']!, _favoriteMeta),
+      );
+    }
     if (data.containsKey('sync_status')) {
       context.handle(
         _syncStatusMeta,
@@ -257,6 +279,10 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.bool,
         data['${effectivePrefix}archived'],
       )!,
+      favorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}favorite'],
+      )!,
       syncStatus: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}sync_status'],
@@ -287,6 +313,7 @@ class Task extends DataClass implements Insertable<Task> {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool archived;
+  final bool favorite;
 
   /// One of the values from SyncStatus.
   final String syncStatus;
@@ -303,6 +330,7 @@ class Task extends DataClass implements Insertable<Task> {
     required this.createdAt,
     required this.updatedAt,
     required this.archived,
+    required this.favorite,
     required this.syncStatus,
     this.deletedAt,
   });
@@ -319,6 +347,7 @@ class Task extends DataClass implements Insertable<Task> {
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['archived'] = Variable<bool>(archived);
+    map['favorite'] = Variable<bool>(favorite);
     map['sync_status'] = Variable<String>(syncStatus);
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
@@ -338,6 +367,7 @@ class Task extends DataClass implements Insertable<Task> {
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       archived: Value(archived),
+      favorite: Value(favorite),
       syncStatus: Value(syncStatus),
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
@@ -359,6 +389,7 @@ class Task extends DataClass implements Insertable<Task> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       archived: serializer.fromJson<bool>(json['archived']),
+      favorite: serializer.fromJson<bool>(json['favorite']),
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
@@ -375,6 +406,7 @@ class Task extends DataClass implements Insertable<Task> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'archived': serializer.toJson<bool>(archived),
+      'favorite': serializer.toJson<bool>(favorite),
       'syncStatus': serializer.toJson<String>(syncStatus),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
@@ -389,6 +421,7 @@ class Task extends DataClass implements Insertable<Task> {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? archived,
+    bool? favorite,
     String? syncStatus,
     Value<DateTime?> deletedAt = const Value.absent(),
   }) => Task(
@@ -400,6 +433,7 @@ class Task extends DataClass implements Insertable<Task> {
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     archived: archived ?? this.archived,
+    favorite: favorite ?? this.favorite,
     syncStatus: syncStatus ?? this.syncStatus,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
@@ -415,6 +449,7 @@ class Task extends DataClass implements Insertable<Task> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       archived: data.archived.present ? data.archived.value : this.archived,
+      favorite: data.favorite.present ? data.favorite.value : this.favorite,
       syncStatus: data.syncStatus.present
           ? data.syncStatus.value
           : this.syncStatus,
@@ -433,6 +468,7 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('archived: $archived, ')
+          ..write('favorite: $favorite, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('deletedAt: $deletedAt')
           ..write(')'))
@@ -449,6 +485,7 @@ class Task extends DataClass implements Insertable<Task> {
     createdAt,
     updatedAt,
     archived,
+    favorite,
     syncStatus,
     deletedAt,
   );
@@ -464,6 +501,7 @@ class Task extends DataClass implements Insertable<Task> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.archived == this.archived &&
+          other.favorite == this.favorite &&
           other.syncStatus == this.syncStatus &&
           other.deletedAt == this.deletedAt);
 }
@@ -477,6 +515,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<bool> archived;
+  final Value<bool> favorite;
   final Value<String> syncStatus;
   final Value<DateTime?> deletedAt;
   const TasksCompanion({
@@ -488,6 +527,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.archived = const Value.absent(),
+    this.favorite = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.deletedAt = const Value.absent(),
   });
@@ -500,6 +540,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     required DateTime createdAt,
     required DateTime updatedAt,
     this.archived = const Value.absent(),
+    this.favorite = const Value.absent(),
     required String syncStatus,
     this.deletedAt = const Value.absent(),
   }) : syncId = Value(syncId),
@@ -517,6 +558,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<bool>? archived,
+    Expression<bool>? favorite,
     Expression<String>? syncStatus,
     Expression<DateTime>? deletedAt,
   }) {
@@ -529,6 +571,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (archived != null) 'archived': archived,
+      if (favorite != null) 'favorite': favorite,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (deletedAt != null) 'deleted_at': deletedAt,
     });
@@ -543,6 +586,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<bool>? archived,
+    Value<bool>? favorite,
     Value<String>? syncStatus,
     Value<DateTime?>? deletedAt,
   }) {
@@ -555,6 +599,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       archived: archived ?? this.archived,
+      favorite: favorite ?? this.favorite,
       syncStatus: syncStatus ?? this.syncStatus,
       deletedAt: deletedAt ?? this.deletedAt,
     );
@@ -587,6 +632,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     if (archived.present) {
       map['archived'] = Variable<bool>(archived.value);
     }
+    if (favorite.present) {
+      map['favorite'] = Variable<bool>(favorite.value);
+    }
     if (syncStatus.present) {
       map['sync_status'] = Variable<String>(syncStatus.value);
     }
@@ -607,6 +655,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('archived: $archived, ')
+          ..write('favorite: $favorite, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('deletedAt: $deletedAt')
           ..write(')'))
@@ -1747,12 +1796,529 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
   }
 }
 
+class $ActiveTimersTable extends ActiveTimers
+    with TableInfo<$ActiveTimersTable, ActiveTimer> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ActiveTimersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _taskIdMeta = const VerificationMeta('taskId');
+  @override
+  late final GeneratedColumn<int> taskId = GeneratedColumn<int>(
+    'task_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currentSegmentStartedAtMeta =
+      const VerificationMeta('currentSegmentStartedAt');
+  @override
+  late final GeneratedColumn<DateTime> currentSegmentStartedAt =
+      GeneratedColumn<DateTime>(
+        'current_segment_started_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _accumulatedSecondsMeta =
+      const VerificationMeta('accumulatedSeconds');
+  @override
+  late final GeneratedColumn<int> accumulatedSeconds = GeneratedColumn<int>(
+    'accumulated_seconds',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    userId,
+    taskId,
+    status,
+    startedAt,
+    currentSegmentStartedAt,
+    accumulatedSeconds,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'active_timers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ActiveTimer> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('task_id')) {
+      context.handle(
+        _taskIdMeta,
+        taskId.isAcceptableOrUnknown(data['task_id']!, _taskIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_taskIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedAtMeta);
+    }
+    if (data.containsKey('current_segment_started_at')) {
+      context.handle(
+        _currentSegmentStartedAtMeta,
+        currentSegmentStartedAt.isAcceptableOrUnknown(
+          data['current_segment_started_at']!,
+          _currentSegmentStartedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('accumulated_seconds')) {
+      context.handle(
+        _accumulatedSecondsMeta,
+        accumulatedSeconds.isAcceptableOrUnknown(
+          data['accumulated_seconds']!,
+          _accumulatedSecondsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ActiveTimer map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ActiveTimer(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      taskId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}task_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      )!,
+      currentSegmentStartedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}current_segment_started_at'],
+      ),
+      accumulatedSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}accumulated_seconds'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ActiveTimersTable createAlias(String alias) {
+    return $ActiveTimersTable(attachedDatabase, alias);
+  }
+}
+
+class ActiveTimer extends DataClass implements Insertable<ActiveTimer> {
+  final int id;
+  final String userId;
+  final int taskId;
+  final String status;
+  final DateTime startedAt;
+  final DateTime? currentSegmentStartedAt;
+  final int accumulatedSeconds;
+  final DateTime updatedAt;
+  const ActiveTimer({
+    required this.id,
+    required this.userId,
+    required this.taskId,
+    required this.status,
+    required this.startedAt,
+    this.currentSegmentStartedAt,
+    required this.accumulatedSeconds,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['user_id'] = Variable<String>(userId);
+    map['task_id'] = Variable<int>(taskId);
+    map['status'] = Variable<String>(status);
+    map['started_at'] = Variable<DateTime>(startedAt);
+    if (!nullToAbsent || currentSegmentStartedAt != null) {
+      map['current_segment_started_at'] = Variable<DateTime>(
+        currentSegmentStartedAt,
+      );
+    }
+    map['accumulated_seconds'] = Variable<int>(accumulatedSeconds);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ActiveTimersCompanion toCompanion(bool nullToAbsent) {
+    return ActiveTimersCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      taskId: Value(taskId),
+      status: Value(status),
+      startedAt: Value(startedAt),
+      currentSegmentStartedAt: currentSegmentStartedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentSegmentStartedAt),
+      accumulatedSeconds: Value(accumulatedSeconds),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ActiveTimer.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ActiveTimer(
+      id: serializer.fromJson<int>(json['id']),
+      userId: serializer.fromJson<String>(json['userId']),
+      taskId: serializer.fromJson<int>(json['taskId']),
+      status: serializer.fromJson<String>(json['status']),
+      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
+      currentSegmentStartedAt: serializer.fromJson<DateTime?>(
+        json['currentSegmentStartedAt'],
+      ),
+      accumulatedSeconds: serializer.fromJson<int>(json['accumulatedSeconds']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'userId': serializer.toJson<String>(userId),
+      'taskId': serializer.toJson<int>(taskId),
+      'status': serializer.toJson<String>(status),
+      'startedAt': serializer.toJson<DateTime>(startedAt),
+      'currentSegmentStartedAt': serializer.toJson<DateTime?>(
+        currentSegmentStartedAt,
+      ),
+      'accumulatedSeconds': serializer.toJson<int>(accumulatedSeconds),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ActiveTimer copyWith({
+    int? id,
+    String? userId,
+    int? taskId,
+    String? status,
+    DateTime? startedAt,
+    Value<DateTime?> currentSegmentStartedAt = const Value.absent(),
+    int? accumulatedSeconds,
+    DateTime? updatedAt,
+  }) => ActiveTimer(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    taskId: taskId ?? this.taskId,
+    status: status ?? this.status,
+    startedAt: startedAt ?? this.startedAt,
+    currentSegmentStartedAt: currentSegmentStartedAt.present
+        ? currentSegmentStartedAt.value
+        : this.currentSegmentStartedAt,
+    accumulatedSeconds: accumulatedSeconds ?? this.accumulatedSeconds,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ActiveTimer copyWithCompanion(ActiveTimersCompanion data) {
+    return ActiveTimer(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      taskId: data.taskId.present ? data.taskId.value : this.taskId,
+      status: data.status.present ? data.status.value : this.status,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      currentSegmentStartedAt: data.currentSegmentStartedAt.present
+          ? data.currentSegmentStartedAt.value
+          : this.currentSegmentStartedAt,
+      accumulatedSeconds: data.accumulatedSeconds.present
+          ? data.accumulatedSeconds.value
+          : this.accumulatedSeconds,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActiveTimer(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('taskId: $taskId, ')
+          ..write('status: $status, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('currentSegmentStartedAt: $currentSegmentStartedAt, ')
+          ..write('accumulatedSeconds: $accumulatedSeconds, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    userId,
+    taskId,
+    status,
+    startedAt,
+    currentSegmentStartedAt,
+    accumulatedSeconds,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ActiveTimer &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.taskId == this.taskId &&
+          other.status == this.status &&
+          other.startedAt == this.startedAt &&
+          other.currentSegmentStartedAt == this.currentSegmentStartedAt &&
+          other.accumulatedSeconds == this.accumulatedSeconds &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ActiveTimersCompanion extends UpdateCompanion<ActiveTimer> {
+  final Value<int> id;
+  final Value<String> userId;
+  final Value<int> taskId;
+  final Value<String> status;
+  final Value<DateTime> startedAt;
+  final Value<DateTime?> currentSegmentStartedAt;
+  final Value<int> accumulatedSeconds;
+  final Value<DateTime> updatedAt;
+  const ActiveTimersCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.taskId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.currentSegmentStartedAt = const Value.absent(),
+    this.accumulatedSeconds = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  ActiveTimersCompanion.insert({
+    this.id = const Value.absent(),
+    required String userId,
+    required int taskId,
+    required String status,
+    required DateTime startedAt,
+    this.currentSegmentStartedAt = const Value.absent(),
+    this.accumulatedSeconds = const Value.absent(),
+    required DateTime updatedAt,
+  }) : userId = Value(userId),
+       taskId = Value(taskId),
+       status = Value(status),
+       startedAt = Value(startedAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<ActiveTimer> custom({
+    Expression<int>? id,
+    Expression<String>? userId,
+    Expression<int>? taskId,
+    Expression<String>? status,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? currentSegmentStartedAt,
+    Expression<int>? accumulatedSeconds,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (taskId != null) 'task_id': taskId,
+      if (status != null) 'status': status,
+      if (startedAt != null) 'started_at': startedAt,
+      if (currentSegmentStartedAt != null)
+        'current_segment_started_at': currentSegmentStartedAt,
+      if (accumulatedSeconds != null) 'accumulated_seconds': accumulatedSeconds,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  ActiveTimersCompanion copyWith({
+    Value<int>? id,
+    Value<String>? userId,
+    Value<int>? taskId,
+    Value<String>? status,
+    Value<DateTime>? startedAt,
+    Value<DateTime?>? currentSegmentStartedAt,
+    Value<int>? accumulatedSeconds,
+    Value<DateTime>? updatedAt,
+  }) {
+    return ActiveTimersCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      taskId: taskId ?? this.taskId,
+      status: status ?? this.status,
+      startedAt: startedAt ?? this.startedAt,
+      currentSegmentStartedAt:
+          currentSegmentStartedAt ?? this.currentSegmentStartedAt,
+      accumulatedSeconds: accumulatedSeconds ?? this.accumulatedSeconds,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (taskId.present) {
+      map['task_id'] = Variable<int>(taskId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (currentSegmentStartedAt.present) {
+      map['current_segment_started_at'] = Variable<DateTime>(
+        currentSegmentStartedAt.value,
+      );
+    }
+    if (accumulatedSeconds.present) {
+      map['accumulated_seconds'] = Variable<int>(accumulatedSeconds.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActiveTimersCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('taskId: $taskId, ')
+          ..write('status: $status, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('currentSegmentStartedAt: $currentSegmentStartedAt, ')
+          ..write('accumulatedSeconds: $accumulatedSeconds, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $TasksTable tasks = $TasksTable(this);
   late final $TimeEntriesTable timeEntries = $TimeEntriesTable(this);
   late final $UserProfilesTable userProfiles = $UserProfilesTable(this);
+  late final $ActiveTimersTable activeTimers = $ActiveTimersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1761,6 +2327,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     tasks,
     timeEntries,
     userProfiles,
+    activeTimers,
   ];
 }
 
@@ -1774,6 +2341,7 @@ typedef $$TasksTableCreateCompanionBuilder =
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<bool> archived,
+      Value<bool> favorite,
       required String syncStatus,
       Value<DateTime?> deletedAt,
     });
@@ -1787,6 +2355,7 @@ typedef $$TasksTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<bool> archived,
+      Value<bool> favorite,
       Value<String> syncStatus,
       Value<DateTime?> deletedAt,
     });
@@ -1836,6 +2405,11 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
 
   ColumnFilters<bool> get archived => $composableBuilder(
     column: $table.archived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get favorite => $composableBuilder(
+    column: $table.favorite,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1899,6 +2473,11 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get favorite => $composableBuilder(
+    column: $table.favorite,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get syncStatus => $composableBuilder(
     column: $table.syncStatus,
     builder: (column) => ColumnOrderings(column),
@@ -1945,6 +2524,9 @@ class $$TasksTableAnnotationComposer
   GeneratedColumn<bool> get archived =>
       $composableBuilder(column: $table.archived, builder: (column) => column);
 
+  GeneratedColumn<bool> get favorite =>
+      $composableBuilder(column: $table.favorite, builder: (column) => column);
+
   GeneratedColumn<String> get syncStatus => $composableBuilder(
     column: $table.syncStatus,
     builder: (column) => column,
@@ -1990,6 +2572,7 @@ class $$TasksTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> archived = const Value.absent(),
+                Value<bool> favorite = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
               }) => TasksCompanion(
@@ -2001,6 +2584,7 @@ class $$TasksTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 archived: archived,
+                favorite: favorite,
                 syncStatus: syncStatus,
                 deletedAt: deletedAt,
               ),
@@ -2014,6 +2598,7 @@ class $$TasksTableTableManager
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<bool> archived = const Value.absent(),
+                Value<bool> favorite = const Value.absent(),
                 required String syncStatus,
                 Value<DateTime?> deletedAt = const Value.absent(),
               }) => TasksCompanion.insert(
@@ -2025,6 +2610,7 @@ class $$TasksTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 archived: archived,
+                favorite: favorite,
                 syncStatus: syncStatus,
                 deletedAt: deletedAt,
               ),
@@ -2599,6 +3185,261 @@ typedef $$UserProfilesTableProcessedTableManager =
       UserProfile,
       PrefetchHooks Function()
     >;
+typedef $$ActiveTimersTableCreateCompanionBuilder =
+    ActiveTimersCompanion Function({
+      Value<int> id,
+      required String userId,
+      required int taskId,
+      required String status,
+      required DateTime startedAt,
+      Value<DateTime?> currentSegmentStartedAt,
+      Value<int> accumulatedSeconds,
+      required DateTime updatedAt,
+    });
+typedef $$ActiveTimersTableUpdateCompanionBuilder =
+    ActiveTimersCompanion Function({
+      Value<int> id,
+      Value<String> userId,
+      Value<int> taskId,
+      Value<String> status,
+      Value<DateTime> startedAt,
+      Value<DateTime?> currentSegmentStartedAt,
+      Value<int> accumulatedSeconds,
+      Value<DateTime> updatedAt,
+    });
+
+class $$ActiveTimersTableFilterComposer
+    extends Composer<_$AppDatabase, $ActiveTimersTable> {
+  $$ActiveTimersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get currentSegmentStartedAt => $composableBuilder(
+    column: $table.currentSegmentStartedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get accumulatedSeconds => $composableBuilder(
+    column: $table.accumulatedSeconds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ActiveTimersTableOrderingComposer
+    extends Composer<_$AppDatabase, $ActiveTimersTable> {
+  $$ActiveTimersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get currentSegmentStartedAt => $composableBuilder(
+    column: $table.currentSegmentStartedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get accumulatedSeconds => $composableBuilder(
+    column: $table.accumulatedSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ActiveTimersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ActiveTimersTable> {
+  $$ActiveTimersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<int> get taskId =>
+      $composableBuilder(column: $table.taskId, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get currentSegmentStartedAt => $composableBuilder(
+    column: $table.currentSegmentStartedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get accumulatedSeconds => $composableBuilder(
+    column: $table.accumulatedSeconds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ActiveTimersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ActiveTimersTable,
+          ActiveTimer,
+          $$ActiveTimersTableFilterComposer,
+          $$ActiveTimersTableOrderingComposer,
+          $$ActiveTimersTableAnnotationComposer,
+          $$ActiveTimersTableCreateCompanionBuilder,
+          $$ActiveTimersTableUpdateCompanionBuilder,
+          (
+            ActiveTimer,
+            BaseReferences<_$AppDatabase, $ActiveTimersTable, ActiveTimer>,
+          ),
+          ActiveTimer,
+          PrefetchHooks Function()
+        > {
+  $$ActiveTimersTableTableManager(_$AppDatabase db, $ActiveTimersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ActiveTimersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ActiveTimersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ActiveTimersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<int> taskId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> startedAt = const Value.absent(),
+                Value<DateTime?> currentSegmentStartedAt = const Value.absent(),
+                Value<int> accumulatedSeconds = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => ActiveTimersCompanion(
+                id: id,
+                userId: userId,
+                taskId: taskId,
+                status: status,
+                startedAt: startedAt,
+                currentSegmentStartedAt: currentSegmentStartedAt,
+                accumulatedSeconds: accumulatedSeconds,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String userId,
+                required int taskId,
+                required String status,
+                required DateTime startedAt,
+                Value<DateTime?> currentSegmentStartedAt = const Value.absent(),
+                Value<int> accumulatedSeconds = const Value.absent(),
+                required DateTime updatedAt,
+              }) => ActiveTimersCompanion.insert(
+                id: id,
+                userId: userId,
+                taskId: taskId,
+                status: status,
+                startedAt: startedAt,
+                currentSegmentStartedAt: currentSegmentStartedAt,
+                accumulatedSeconds: accumulatedSeconds,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ActiveTimersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ActiveTimersTable,
+      ActiveTimer,
+      $$ActiveTimersTableFilterComposer,
+      $$ActiveTimersTableOrderingComposer,
+      $$ActiveTimersTableAnnotationComposer,
+      $$ActiveTimersTableCreateCompanionBuilder,
+      $$ActiveTimersTableUpdateCompanionBuilder,
+      (
+        ActiveTimer,
+        BaseReferences<_$AppDatabase, $ActiveTimersTable, ActiveTimer>,
+      ),
+      ActiveTimer,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2609,4 +3450,6 @@ class $AppDatabaseManager {
       $$TimeEntriesTableTableManager(_db, _db.timeEntries);
   $$UserProfilesTableTableManager get userProfiles =>
       $$UserProfilesTableTableManager(_db, _db.userProfiles);
+  $$ActiveTimersTableTableManager get activeTimers =>
+      $$ActiveTimersTableTableManager(_db, _db.activeTimers);
 }

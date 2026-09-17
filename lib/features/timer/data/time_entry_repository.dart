@@ -201,4 +201,65 @@ class TimeEntryRepository {
         ),
     };
   }
+
+  Future<TimeEntry?> getTimeEntryBySyncId(String syncId) {
+    return (database.select(
+      database.timeEntries,
+    )..where((entry) => entry.syncId.equals(syncId))).getSingleOrNull();
+  }
+
+  Future<void> insertRemoteTimeEntry({
+    required String syncId,
+    required String userId,
+    required int taskId,
+    required DateTime startedAt,
+    required DateTime? endedAt,
+    required int? durationSeconds,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    DateTime? deletedAt,
+  }) async {
+    await database
+        .into(database.timeEntries)
+        .insert(
+          TimeEntriesCompanion.insert(
+            syncId: syncId,
+            userId: userId,
+            taskId: taskId,
+            startedAt: startedAt,
+            endedAt: Value(endedAt),
+            durationSeconds: Value(durationSeconds),
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            syncStatus: SyncStatus.synced.name,
+            deletedAt: Value(deletedAt),
+          ),
+        );
+  }
+
+  Future<void> updateFromRemote({
+    required int id,
+    required int taskId,
+    required DateTime startedAt,
+    required DateTime? endedAt,
+    required int? durationSeconds,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    DateTime? deletedAt,
+  }) async {
+    await (database.update(
+      database.timeEntries,
+    )..where((entry) => entry.id.equals(id))).write(
+      TimeEntriesCompanion(
+        taskId: Value(taskId),
+        startedAt: Value(startedAt),
+        endedAt: Value(endedAt),
+        durationSeconds: Value(durationSeconds),
+        createdAt: Value(createdAt),
+        updatedAt: Value(updatedAt),
+        deletedAt: Value(deletedAt),
+        syncStatus: Value(SyncStatus.synced.name),
+      ),
+    );
+  }
 }

@@ -19,6 +19,8 @@ class Tasks extends Table {
 
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
 
+  BoolColumn get favorite => boolean().withDefault(const Constant(false))();
+
   /// One of the values from SyncStatus.
   TextColumn get syncStatus => text()();
 

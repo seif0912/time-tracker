@@ -38,6 +38,7 @@ class TaskSyncService {
       'createdAt': Timestamp.fromDate(task.createdAt),
       'updatedAt': Timestamp.fromDate(task.updatedAt),
       'archived': task.archived,
+      'favorite': task.favorite,
       'deletedAt': task.deletedAt == null
           ? null
           : Timestamp.fromDate(task.deletedAt!),
@@ -64,6 +65,7 @@ class TaskSyncService {
           'createdAt': Timestamp.fromDate(task.createdAt),
           'updatedAt': Timestamp.fromDate(task.updatedAt),
           'archived': task.archived,
+          'favorite': task.favorite,
           'deletedAt': Timestamp.fromDate(deletedAt),
         });
 
@@ -98,6 +100,8 @@ class TaskSyncService {
 
       final archived = data['archived'] as bool? ?? false;
 
+      final favorite = data['favorite'] as bool? ?? false;
+
       final deletedAt = (data['deletedAt'] as Timestamp?)?.toDate();
 
       if (syncId == null ||
@@ -125,6 +129,7 @@ class TaskSyncService {
           createdAt: createdAt,
           updatedAt: updatedAt,
           archived: archived,
+          favorite: favorite,
           deletedAt: deletedAt,
         );
 
@@ -148,6 +153,7 @@ class TaskSyncService {
         createdAt: createdAt,
         updatedAt: updatedAt,
         archived: archived,
+        favorite: favorite,
         deletedAt: deletedAt,
       );
     }

@@ -4,15 +4,17 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'tables/tasks.dart';
 import 'tables/time_entries.dart';
 import 'tables/user_profiles.dart';
+import 'tables/active_timers.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Tasks, TimeEntries, UserProfiles])
+@DriftDatabase(tables: [Tasks, TimeEntries, UserProfiles, ActiveTimers])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -35,6 +37,12 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(tasks, tasks.updatedAt);
         await m.addColumn(tasks, tasks.syncStatus);
         await m.addColumn(tasks, tasks.deletedAt);
+      }
+      if (from < 4) {
+        await m.addColumn(tasks, tasks.favorite);
+      }
+      if (from < 5) {
+        await m.createTable(activeTimers);
       }
     },
   );

@@ -283,4 +283,39 @@ class TaskController extends AsyncNotifier<List<Task>> {
       throw ErrorHandler.handle(error, stackTrace);
     }
   }
+
+  Future<void> toggleFavorite(int id) async {
+    try {
+      final repository = ref.read(taskRepositoryProvider);
+
+      await repository.toggleFavorite(id);
+
+      AppLogger.info('Task favorite toggled: $id');
+      AnalyticsService.instance.logEvent('task_favorite_toggled');
+
+      state = AsyncData(await _loadTasks());
+
+      final user = ref.read(authRepositoryProvider).currentUser;
+
+      if (user != null) {
+        try {
+          await ref.read(taskSyncServiceProvider).syncTasks(user.uid);
+        } catch (error, stackTrace) {
+          AppLogger.error(
+            'Failed to sync favorite change: $id',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+      }
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to toggle task favorite: $id',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      state = AsyncError(ErrorHandler.handle(error, stackTrace), stackTrace);
+    }
+  }
 }
