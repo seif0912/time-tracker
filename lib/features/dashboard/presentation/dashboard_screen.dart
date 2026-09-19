@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/widgets.dart';
 import '../../timer/domain/time_summary.dart';
-// import '../domain/dashboard_state.dart';
 import 'dashboard_controller.dart';
-import '../../tasks/presentation/task_controller.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -13,7 +11,6 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboard = ref.watch(dashboardControllerProvider);
-    final tasks = ref.watch(taskControllerProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
@@ -61,13 +58,8 @@ class DashboardScreen extends ConsumerWidget {
                   )
                 else
                   ...data.rankedTasks.map((taskSummary) {
-                    final task = tasks.value?.where(
-                      (task) => task.id == taskSummary.taskId,
-                    );
-
-                    final taskName = task != null && task.isNotEmpty
-                        ? task.first.name
-                        : 'Unknown task';
+                    final taskName =
+                        data.taskNames[taskSummary.taskId] ?? 'Deleted task';
 
                     return AppCard(
                       child: ListTile(

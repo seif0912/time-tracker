@@ -6,9 +6,11 @@ class DashboardState {
     required this.today,
     required this.thisWeek,
     required this.rankedTasks,
+    required this.taskNames,
   });
 
   final TimeSummary today;
   final TimeSummary thisWeek;
   final List<TaskTimeSummary> rankedTasks;
+  final Map<int, String> taskNames;
 }

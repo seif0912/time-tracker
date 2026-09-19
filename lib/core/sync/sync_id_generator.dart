@@ -1,7 +1,9 @@
+import 'package:uuid/uuid.dart';
+
 class SyncIdGenerator {
   const SyncIdGenerator();
 
   String generate() {
-    return DateTime.now().microsecondsSinceEpoch.toString();
+    return const Uuid().v4();
   }
 }

@@ -220,4 +220,10 @@ class TaskRepository {
       ),
     );
   }
+
+  Future<List<Task>> getAllTasksForUser(String userId) {
+    return (database.select(
+      database.tasks,
+    )..where((task) => task.userId.equals(userId))).get();
+  }
 }

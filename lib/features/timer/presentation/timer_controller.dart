@@ -7,7 +7,7 @@ import '../../../core/sync/sync_providers.dart';
 import '../data/active_timer_providers.dart';
 import '../data/time_entry_providers.dart';
 import '../domain/timer_state.dart';
-import '../../authentication/data/current_user_provider.dart';
+import '../../authentication/data/current_user_id_provider.dart';
 
 final timerControllerProvider = NotifierProvider<TimerController, TimerState>(
   TimerController.new,
@@ -28,15 +28,15 @@ class TimerController extends Notifier<TimerState> {
   }
 
   Future<void> _restoreActiveTimers() async {
-    final user = ref.read(currentUserProvider);
+    final userId = ref.read(currentUserIdProvider);
 
-    if (user == null) {
+    if (userId == null) {
       return;
     }
 
     final repository = ref.read(activeTimerRepositoryProvider);
 
-    final activeTimers = await repository.getForUser(user.uid);
+    final activeTimers = await repository.getForUser(userId);
 
     if (activeTimers.isEmpty) {
       return;
@@ -55,27 +55,27 @@ class TimerController extends Notifier<TimerState> {
   }
 
   Future<void> _persistSession(TimerSessionState session) async {
-    final user = ref.read(currentUserProvider);
+    final userId = ref.read(currentUserIdProvider);
 
-    if (user == null) {
+    if (userId == null) {
       return;
     }
 
     await ref
         .read(activeTimerRepositoryProvider)
-        .save(userId: user.uid, session: session);
+        .save(userId: userId, session: session);
   }
 
   Future<void> _deletePersistedSession(int taskId) async {
-    final user = ref.read(currentUserProvider);
+    final userId = ref.read(currentUserIdProvider);
 
-    if (user == null) {
+    if (userId == null) {
       return;
     }
 
     await ref
         .read(activeTimerRepositoryProvider)
-        .deleteForTask(userId: user.uid, taskId: taskId);
+        .deleteForTask(userId: userId, taskId: taskId);
   }
 
   void start({required int taskId}) {
@@ -232,19 +232,19 @@ class TimerController extends Notifier<TimerState> {
 
     _ticker?.cancel();
 
-    final user = ref.read(currentUserProvider);
+    final userId = ref.read(currentUserIdProvider);
 
     if (totalSeconds <= 0) {
       _removeSession(taskId);
 
-      if (user != null) {
+      if (userId != null) {
         await _deletePersistedSession(taskId);
       }
 
       return;
     }
 
-    if (user == null) {
+    if (userId == null) {
       return;
     }
 
@@ -255,7 +255,7 @@ class TimerController extends Notifier<TimerState> {
     await repository.createTimeEntry(
       taskId: taskId,
       syncId: syncId,
-      userId: user.uid,
+      userId: userId,
       startedAt: session.startedAt,
       endedAt: DateTime.now(),
       durationSeconds: totalSeconds,

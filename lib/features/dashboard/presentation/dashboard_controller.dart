@@ -5,6 +5,8 @@ import '../../../core/logging/app_logger.dart';
 import '../../authentication/data/auth_providers.dart';
 import '../../timer/presentation/time_summary_controller.dart';
 import '../domain/dashboard_state.dart';
+import '../../tasks/data/task_providers.dart';
+import '../../../core/services/database/app_database.dart';
 
 final dashboardControllerProvider =
     AsyncNotifierProvider<DashboardController, DashboardState>(
@@ -40,10 +42,21 @@ class DashboardController extends AsyncNotifier<DashboardState> {
         end: weekStart.add(const Duration(days: 7)),
       );
 
+      final user = ref.read(authRepositoryProvider).currentUser;
+
+      final tasks = user == null
+          ? <Task>[]
+          : await ref.read(taskRepositoryProvider).getAllTasksForUser(user.uid);
+
+      final taskNames = <int, String>{
+        for (final task in tasks) task.id: task.name,
+      };
+
       return DashboardState(
         today: today,
         thisWeek: thisWeek,
         rankedTasks: rankedTasks,
+        taskNames: taskNames,
       );
     } catch (error, stackTrace) {
       AppLogger.error(
@@ -51,7 +64,6 @@ class DashboardController extends AsyncNotifier<DashboardState> {
         error: error,
         stackTrace: stackTrace,
       );
-
       throw ErrorHandler.handle(error, stackTrace);
     }
   }

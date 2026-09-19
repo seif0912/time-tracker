@@ -120,30 +120,33 @@ class TimeEntryRepository {
 
   Future<List<HistoryEntry>> getHistoryForUser(String userId) async {
     final query = database.select(database.timeEntries).join([
-      innerJoin(
+      leftOuterJoin(
         database.tasks,
         database.tasks.id.equalsExp(database.timeEntries.taskId),
       ),
     ]);
+
     query.where(
       database.timeEntries.userId.equals(userId) &
-          database.timeEntries.deletedAt.isNull() &
-          database.tasks.deletedAt.isNull() &
-          database.tasks.userId.equals(userId),
+          database.timeEntries.deletedAt.isNull(),
     );
+
     query.orderBy([
       OrderingTerm(
         expression: database.timeEntries.startedAt,
         mode: OrderingMode.desc,
       ),
     ]);
+
     final rows = await query.get();
+
     return rows.map((row) {
       final entry = row.readTable(database.timeEntries);
-      final task = row.readTable(database.tasks);
+      final task = row.readTableOrNull(database.tasks);
+
       return HistoryEntry(
         taskId: entry.taskId,
-        taskName: task.name,
+        taskName: task?.name ?? 'Deleted task',
         startedAt: entry.startedAt,
         endedAt: entry.endedAt,
         durationSeconds: entry.durationSeconds ?? 0,
