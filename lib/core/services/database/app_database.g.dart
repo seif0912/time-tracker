@@ -134,6 +134,39 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('work'),
+  );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('#7143AC'),
+  );
+  static const VerificationMeta _estimatedDurationSecondsMeta =
+      const VerificationMeta('estimatedDurationSeconds');
+  @override
+  late final GeneratedColumn<int> estimatedDurationSeconds =
+      GeneratedColumn<int>(
+        'estimated_duration_seconds',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -147,6 +180,9 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     favorite,
     syncStatus,
     deletedAt,
+    category,
+    color,
+    estimatedDurationSeconds,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -238,6 +274,27 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
+    if (data.containsKey('estimated_duration_seconds')) {
+      context.handle(
+        _estimatedDurationSecondsMeta,
+        estimatedDurationSeconds.isAcceptableOrUnknown(
+          data['estimated_duration_seconds']!,
+          _estimatedDurationSecondsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -291,6 +348,18 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
       ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      )!,
+      estimatedDurationSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}estimated_duration_seconds'],
+      ),
     );
   }
 
@@ -321,6 +390,16 @@ class Task extends DataClass implements Insertable<Task> {
   /// Tombstone used when a task is deleted locally but still needs
   /// to be deleted from Firebase.
   final DateTime? deletedAt;
+
+  /// Built-in category: work, study, personal, health,
+  /// fitness, finance, or other.
+  final String category;
+
+  /// Hex color used to visually identify the task.
+  final String color;
+
+  /// Optional estimated task duration, in seconds.
+  final int? estimatedDurationSeconds;
   const Task({
     required this.id,
     required this.syncId,
@@ -333,6 +412,9 @@ class Task extends DataClass implements Insertable<Task> {
     required this.favorite,
     required this.syncStatus,
     this.deletedAt,
+    required this.category,
+    required this.color,
+    this.estimatedDurationSeconds,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -351,6 +433,13 @@ class Task extends DataClass implements Insertable<Task> {
     map['sync_status'] = Variable<String>(syncStatus);
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['category'] = Variable<String>(category);
+    map['color'] = Variable<String>(color);
+    if (!nullToAbsent || estimatedDurationSeconds != null) {
+      map['estimated_duration_seconds'] = Variable<int>(
+        estimatedDurationSeconds,
+      );
     }
     return map;
   }
@@ -372,6 +461,11 @@ class Task extends DataClass implements Insertable<Task> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
+      category: Value(category),
+      color: Value(color),
+      estimatedDurationSeconds: estimatedDurationSeconds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(estimatedDurationSeconds),
     );
   }
 
@@ -392,6 +486,11 @@ class Task extends DataClass implements Insertable<Task> {
       favorite: serializer.fromJson<bool>(json['favorite']),
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      category: serializer.fromJson<String>(json['category']),
+      color: serializer.fromJson<String>(json['color']),
+      estimatedDurationSeconds: serializer.fromJson<int?>(
+        json['estimatedDurationSeconds'],
+      ),
     );
   }
   @override
@@ -409,6 +508,11 @@ class Task extends DataClass implements Insertable<Task> {
       'favorite': serializer.toJson<bool>(favorite),
       'syncStatus': serializer.toJson<String>(syncStatus),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'category': serializer.toJson<String>(category),
+      'color': serializer.toJson<String>(color),
+      'estimatedDurationSeconds': serializer.toJson<int?>(
+        estimatedDurationSeconds,
+      ),
     };
   }
 
@@ -424,6 +528,9 @@ class Task extends DataClass implements Insertable<Task> {
     bool? favorite,
     String? syncStatus,
     Value<DateTime?> deletedAt = const Value.absent(),
+    String? category,
+    String? color,
+    Value<int?> estimatedDurationSeconds = const Value.absent(),
   }) => Task(
     id: id ?? this.id,
     syncId: syncId ?? this.syncId,
@@ -436,6 +543,11 @@ class Task extends DataClass implements Insertable<Task> {
     favorite: favorite ?? this.favorite,
     syncStatus: syncStatus ?? this.syncStatus,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    category: category ?? this.category,
+    color: color ?? this.color,
+    estimatedDurationSeconds: estimatedDurationSeconds.present
+        ? estimatedDurationSeconds.value
+        : this.estimatedDurationSeconds,
   );
   Task copyWithCompanion(TasksCompanion data) {
     return Task(
@@ -454,6 +566,11 @@ class Task extends DataClass implements Insertable<Task> {
           ? data.syncStatus.value
           : this.syncStatus,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      category: data.category.present ? data.category.value : this.category,
+      color: data.color.present ? data.color.value : this.color,
+      estimatedDurationSeconds: data.estimatedDurationSeconds.present
+          ? data.estimatedDurationSeconds.value
+          : this.estimatedDurationSeconds,
     );
   }
 
@@ -470,7 +587,10 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('archived: $archived, ')
           ..write('favorite: $favorite, ')
           ..write('syncStatus: $syncStatus, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('category: $category, ')
+          ..write('color: $color, ')
+          ..write('estimatedDurationSeconds: $estimatedDurationSeconds')
           ..write(')'))
         .toString();
   }
@@ -488,6 +608,9 @@ class Task extends DataClass implements Insertable<Task> {
     favorite,
     syncStatus,
     deletedAt,
+    category,
+    color,
+    estimatedDurationSeconds,
   );
   @override
   bool operator ==(Object other) =>
@@ -503,7 +626,10 @@ class Task extends DataClass implements Insertable<Task> {
           other.archived == this.archived &&
           other.favorite == this.favorite &&
           other.syncStatus == this.syncStatus &&
-          other.deletedAt == this.deletedAt);
+          other.deletedAt == this.deletedAt &&
+          other.category == this.category &&
+          other.color == this.color &&
+          other.estimatedDurationSeconds == this.estimatedDurationSeconds);
 }
 
 class TasksCompanion extends UpdateCompanion<Task> {
@@ -518,6 +644,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<bool> favorite;
   final Value<String> syncStatus;
   final Value<DateTime?> deletedAt;
+  final Value<String> category;
+  final Value<String> color;
+  final Value<int?> estimatedDurationSeconds;
   const TasksCompanion({
     this.id = const Value.absent(),
     this.syncId = const Value.absent(),
@@ -530,6 +659,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.favorite = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.category = const Value.absent(),
+    this.color = const Value.absent(),
+    this.estimatedDurationSeconds = const Value.absent(),
   });
   TasksCompanion.insert({
     this.id = const Value.absent(),
@@ -543,6 +675,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.favorite = const Value.absent(),
     required String syncStatus,
     this.deletedAt = const Value.absent(),
+    this.category = const Value.absent(),
+    this.color = const Value.absent(),
+    this.estimatedDurationSeconds = const Value.absent(),
   }) : syncId = Value(syncId),
        userId = Value(userId),
        name = Value(name),
@@ -561,6 +696,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Expression<bool>? favorite,
     Expression<String>? syncStatus,
     Expression<DateTime>? deletedAt,
+    Expression<String>? category,
+    Expression<String>? color,
+    Expression<int>? estimatedDurationSeconds,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -574,6 +712,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
       if (favorite != null) 'favorite': favorite,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (deletedAt != null) 'deleted_at': deletedAt,
+      if (category != null) 'category': category,
+      if (color != null) 'color': color,
+      if (estimatedDurationSeconds != null)
+        'estimated_duration_seconds': estimatedDurationSeconds,
     });
   }
 
@@ -589,6 +731,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Value<bool>? favorite,
     Value<String>? syncStatus,
     Value<DateTime?>? deletedAt,
+    Value<String>? category,
+    Value<String>? color,
+    Value<int?>? estimatedDurationSeconds,
   }) {
     return TasksCompanion(
       id: id ?? this.id,
@@ -602,6 +747,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
       favorite: favorite ?? this.favorite,
       syncStatus: syncStatus ?? this.syncStatus,
       deletedAt: deletedAt ?? this.deletedAt,
+      category: category ?? this.category,
+      color: color ?? this.color,
+      estimatedDurationSeconds:
+          estimatedDurationSeconds ?? this.estimatedDurationSeconds,
     );
   }
 
@@ -641,6 +790,17 @@ class TasksCompanion extends UpdateCompanion<Task> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
+    if (estimatedDurationSeconds.present) {
+      map['estimated_duration_seconds'] = Variable<int>(
+        estimatedDurationSeconds.value,
+      );
+    }
     return map;
   }
 
@@ -657,7 +817,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
           ..write('archived: $archived, ')
           ..write('favorite: $favorite, ')
           ..write('syncStatus: $syncStatus, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('category: $category, ')
+          ..write('color: $color, ')
+          ..write('estimatedDurationSeconds: $estimatedDurationSeconds')
           ..write(')'))
         .toString();
   }
@@ -2344,6 +2507,9 @@ typedef $$TasksTableCreateCompanionBuilder =
       Value<bool> favorite,
       required String syncStatus,
       Value<DateTime?> deletedAt,
+      Value<String> category,
+      Value<String> color,
+      Value<int?> estimatedDurationSeconds,
     });
 typedef $$TasksTableUpdateCompanionBuilder =
     TasksCompanion Function({
@@ -2358,6 +2524,9 @@ typedef $$TasksTableUpdateCompanionBuilder =
       Value<bool> favorite,
       Value<String> syncStatus,
       Value<DateTime?> deletedAt,
+      Value<String> category,
+      Value<String> color,
+      Value<int?> estimatedDurationSeconds,
     });
 
 class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
@@ -2420,6 +2589,21 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
 
   ColumnFilters<DateTime> get deletedAt => $composableBuilder(
     column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get estimatedDurationSeconds => $composableBuilder(
+    column: $table.estimatedDurationSeconds,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2487,6 +2671,21 @@ class $$TasksTableOrderingComposer
     column: $table.deletedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get estimatedDurationSeconds => $composableBuilder(
+    column: $table.estimatedDurationSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TasksTableAnnotationComposer
@@ -2534,6 +2733,17 @@ class $$TasksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<int> get estimatedDurationSeconds => $composableBuilder(
+    column: $table.estimatedDurationSeconds,
+    builder: (column) => column,
+  );
 }
 
 class $$TasksTableTableManager
@@ -2575,6 +2785,9 @@ class $$TasksTableTableManager
                 Value<bool> favorite = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> color = const Value.absent(),
+                Value<int?> estimatedDurationSeconds = const Value.absent(),
               }) => TasksCompanion(
                 id: id,
                 syncId: syncId,
@@ -2587,6 +2800,9 @@ class $$TasksTableTableManager
                 favorite: favorite,
                 syncStatus: syncStatus,
                 deletedAt: deletedAt,
+                category: category,
+                color: color,
+                estimatedDurationSeconds: estimatedDurationSeconds,
               ),
           createCompanionCallback:
               ({
@@ -2601,6 +2817,9 @@ class $$TasksTableTableManager
                 Value<bool> favorite = const Value.absent(),
                 required String syncStatus,
                 Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> color = const Value.absent(),
+                Value<int?> estimatedDurationSeconds = const Value.absent(),
               }) => TasksCompanion.insert(
                 id: id,
                 syncId: syncId,
@@ -2613,6 +2832,9 @@ class $$TasksTableTableManager
                 favorite: favorite,
                 syncStatus: syncStatus,
                 deletedAt: deletedAt,
+                category: category,
+                color: color,
+                estimatedDurationSeconds: estimatedDurationSeconds,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

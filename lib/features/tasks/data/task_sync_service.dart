@@ -42,6 +42,9 @@ class TaskSyncService {
       'deletedAt': task.deletedAt == null
           ? null
           : Timestamp.fromDate(task.deletedAt!),
+      'category': task.category,
+      'color': task.color,
+      'estimatedDurationSeconds': task.estimatedDurationSeconds,
     };
 
     switch (task.syncStatus) {
@@ -67,6 +70,9 @@ class TaskSyncService {
           'archived': task.archived,
           'favorite': task.favorite,
           'deletedAt': Timestamp.fromDate(deletedAt),
+          'category': task.category,
+          'color': task.color,
+          'estimatedDurationSeconds': task.estimatedDurationSeconds,
         });
 
         await _taskRepository.markTaskAsSynced(task.id);
@@ -103,6 +109,9 @@ class TaskSyncService {
       final favorite = data['favorite'] as bool? ?? false;
 
       final deletedAt = (data['deletedAt'] as Timestamp?)?.toDate();
+      final category = data['category'] as String? ?? 'work';
+      final color = data['color'] as String? ?? '#7143AC';
+      final estimatedDurationSeconds = data['estimatedDurationSeconds'] as int?;
 
       if (syncId == null ||
           remoteUserId == null ||
@@ -131,6 +140,9 @@ class TaskSyncService {
           archived: archived,
           favorite: favorite,
           deletedAt: deletedAt,
+          category: category,
+          color: color,
+          estimatedDurationSeconds: estimatedDurationSeconds,
         );
 
         continue;
@@ -155,6 +167,9 @@ class TaskSyncService {
         archived: archived,
         favorite: favorite,
         deletedAt: deletedAt,
+        category: category,
+        color: color,
+        estimatedDurationSeconds: estimatedDurationSeconds,
       );
     }
   }

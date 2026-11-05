@@ -27,4 +27,14 @@ class Tasks extends Table {
   /// Tombstone used when a task is deleted locally but still needs
   /// to be deleted from Firebase.
   DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  /// Built-in category: work, study, personal, health,
+  /// fitness, finance, or other.
+  TextColumn get category => text().withDefault(const Constant('work'))();
+
+  /// Hex color used to visually identify the task.
+  TextColumn get color => text().withDefault(const Constant('#7143AC'))();
+
+  /// Optional estimated task duration, in seconds.
+  IntColumn get estimatedDurationSeconds => integer().nullable()();
 }

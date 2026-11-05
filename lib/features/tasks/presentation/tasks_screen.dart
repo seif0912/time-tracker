@@ -9,6 +9,26 @@ import '../../../core/services/database/app_database.dart';
 import 'task_list_provider.dart';
 import '../domain/task_sort_order.dart';
 
+const _taskCategories = [
+  'work',
+  'study',
+  'personal',
+  'health',
+  'fitness',
+  'finance',
+  'other',
+];
+
+const _taskColors = [
+  '#7143AC',
+  '#3B82F6',
+  '#10B981',
+  '#F59E0B',
+  '#EF4444',
+  '#EC4899',
+  '#64748B',
+];
+
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
@@ -309,20 +329,22 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Future<void> _createTask(BuildContext context, WidgetRef ref) async {
-    final name = await showDialog<String>(
+    final result = await showDialog<_TaskEditResult>(
       context: context,
-      builder: (dialogContext) {
-        return const _CreateTaskDialog();
-      },
+      builder: (_) => const _CreateTaskDialog(),
     );
 
-    if (name == null || name.trim().isEmpty) {
-      return;
-    }
+    if (result == null) return;
 
     await ref
         .read(taskControllerProvider.notifier)
-        .createTask(name: name.trim());
+        .createTask(
+          name: result.name,
+          description: result.description,
+          category: result.category,
+          color: result.color,
+          estimatedDurationSeconds: result.estimatedDurationSeconds,
+        );
   }
 }
 
@@ -379,7 +401,26 @@ Future<void> _editTask(BuildContext context, WidgetRef ref, Task task) async {
         id: task.id,
         name: result.name,
         description: result.description,
+        category: result.category,
+        color: result.color,
+        estimatedDurationSeconds: result.estimatedDurationSeconds,
       );
+}
+
+class _TaskEditResult {
+  const _TaskEditResult({
+    required this.name,
+    required this.category,
+    required this.color,
+    this.description,
+    this.estimatedDurationSeconds,
+  });
+
+  final String name;
+  final String? description;
+  final String category;
+  final String color;
+  final int? estimatedDurationSeconds;
 }
 
 class _CreateTaskDialog extends StatefulWidget {
@@ -390,59 +431,56 @@ class _CreateTaskDialog extends StatefulWidget {
 }
 
 class _CreateTaskDialogState extends State<_CreateTaskDialog> {
-  late final TextEditingController _controller;
+  final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _estimateController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
+  String _category = 'work';
+  String _color = '#7143AC';
 
   @override
   void dispose() {
-    _controller.dispose();
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _estimateController.dispose();
     super.dispose();
   }
 
   void _submit() {
-    final name = _controller.text.trim();
+    final name = _nameController.text.trim();
+    if (name.isEmpty) return;
 
-    if (name.isEmpty) {
-      return;
-    }
+    final minutes = int.tryParse(_estimateController.text.trim());
 
-    Navigator.of(context).pop(name);
+    Navigator.of(context).pop(
+      _TaskEditResult(
+        name: name,
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
+        category: _category,
+        color: _color,
+        estimatedDurationSeconds: minutes != null && minutes > 0
+            ? minutes * 60
+            : null,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Create task'),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        textInputAction: TextInputAction.done,
-        onSubmitted: (_) => _submit(),
-        decoration: const InputDecoration(hintText: 'Task name'),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancel'),
-        ),
-        FilledButton(onPressed: _submit, child: const Text('Create')),
-      ],
+    return _TaskFormDialog(
+      title: 'Create task',
+      nameController: _nameController,
+      descriptionController: _descriptionController,
+      estimateController: _estimateController,
+      category: _category,
+      color: _color,
+      onCategoryChanged: (value) => setState(() => _category = value),
+      onColorChanged: (value) => setState(() => _color = value),
+      onSubmit: _submit,
     );
   }
-}
-
-class _TaskEditResult {
-  const _TaskEditResult({required this.name, this.description});
-
-  final String name;
-  final String? description;
 }
 
 class _EditTaskDialog extends StatefulWidget {
@@ -457,6 +495,10 @@ class _EditTaskDialog extends StatefulWidget {
 class _EditTaskDialogState extends State<_EditTaskDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
+  late final TextEditingController _estimateController;
+
+  late String _category;
+  late String _color;
 
   @override
   void initState() {
@@ -466,60 +508,172 @@ class _EditTaskDialogState extends State<_EditTaskDialog> {
     _descriptionController = TextEditingController(
       text: widget.task.description ?? '',
     );
+    _estimateController = TextEditingController(
+      text: widget.task.estimatedDurationSeconds == null
+          ? ''
+          : (widget.task.estimatedDurationSeconds! / 60).round().toString(),
+    );
+
+    _category = widget.task.category;
+    _color = widget.task.color;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
+    _estimateController.dispose();
     super.dispose();
   }
 
   void _submit() {
     final name = _nameController.text.trim();
+    if (name.isEmpty) return;
 
-    if (name.isEmpty) {
-      return;
-    }
-
-    final description = _descriptionController.text.trim();
+    final minutes = int.tryParse(_estimateController.text.trim());
 
     Navigator.of(context).pop(
       _TaskEditResult(
         name: name,
-        description: description.isEmpty ? null : description,
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
+        category: _category,
+        color: _color,
+        estimatedDurationSeconds: minutes != null && minutes > 0
+            ? minutes * 60
+            : null,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    return _TaskFormDialog(
+      title: 'Edit task',
+      nameController: _nameController,
+      descriptionController: _descriptionController,
+      estimateController: _estimateController,
+      category: _category,
+      color: _color,
+      onCategoryChanged: (value) => setState(() => _category = value),
+      onColorChanged: (value) => setState(() => _color = value),
+      onSubmit: _submit,
+    );
+  }
+}
+
+class _TaskFormDialog extends StatelessWidget {
+  const _TaskFormDialog({
+    required this.title,
+    required this.nameController,
+    required this.descriptionController,
+    required this.estimateController,
+    required this.category,
+    required this.color,
+    required this.onCategoryChanged,
+    required this.onColorChanged,
+    required this.onSubmit,
+  });
+
+  final String title;
+  final TextEditingController nameController;
+  final TextEditingController descriptionController;
+  final TextEditingController estimateController;
+  final String category;
+  final String color;
+  final ValueChanged<String> onCategoryChanged;
+  final ValueChanged<String> onColorChanged;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit task'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _nameController,
-            autofocus: true,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(labelText: 'Name'),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _descriptionController,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _submit(),
-            decoration: const InputDecoration(labelText: 'Description'),
-          ),
-        ],
+      title: Text(title),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(labelText: 'Name'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: descriptionController,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              initialValue: category,
+              decoration: const InputDecoration(labelText: 'Category'),
+              items: _taskCategories
+                  .map(
+                    (value) => DropdownMenuItem(
+                      value: value,
+                      child: Text(value[0].toUpperCase() + value.substring(1)),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) {
+                if (value != null) onCategoryChanged(value);
+              },
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Color',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 10,
+              children: _taskColors.map((hex) {
+                final selected = hex == color;
+                final colorValue = Color(
+                  int.parse(hex.substring(1), radix: 16) | 0xFF000000,
+                );
+
+                return GestureDetector(
+                  onTap: () => onColorChanged(hex),
+                  child: CircleAvatar(
+                    radius: 16,
+                    backgroundColor: colorValue,
+                    child: selected
+                        ? const Icon(Icons.check, size: 18, color: Colors.white)
+                        : null,
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: estimateController,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => onSubmit(),
+              decoration: const InputDecoration(
+                labelText: 'Estimated duration',
+                suffixText: 'minutes',
+              ),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        FilledButton(onPressed: _submit, child: const Text('Save')),
+        FilledButton(
+          onPressed: onSubmit,
+          child: Text(title == 'Create task' ? 'Create' : 'Save'),
+        ),
       ],
     );
   }

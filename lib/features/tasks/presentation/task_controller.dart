@@ -45,7 +45,13 @@ class TaskController extends AsyncNotifier<List<Task>> {
     return repository.getTasks(user.uid);
   }
 
-  Future<void> createTask({required String name, String? description}) async {
+  Future<void> createTask({
+    required String name,
+    String? description,
+    String category = 'work',
+    String color = '#7143AC',
+    int? estimatedDurationSeconds,
+  }) async {
     if (name.trim().isEmpty) {
       state = AsyncError(
         const ValidationException('Task name cannot be empty.'),
@@ -77,6 +83,9 @@ class TaskController extends AsyncNotifier<List<Task>> {
         description: description,
         syncId: syncId,
         userId: user.uid,
+        category: category,
+        color: color,
+        estimatedDurationSeconds: estimatedDurationSeconds,
       );
 
       AppLogger.info('Task created: ${name.trim()}');
@@ -183,6 +192,9 @@ class TaskController extends AsyncNotifier<List<Task>> {
     required int id,
     required String name,
     String? description,
+    String? category,
+    String? color,
+    int? estimatedDurationSeconds,
   }) async {
     if (name.trim().isEmpty) {
       state = AsyncError(
@@ -199,6 +211,9 @@ class TaskController extends AsyncNotifier<List<Task>> {
         id: id,
         name: name.trim(),
         description: description?.trim(),
+        category: category,
+        color: color,
+        estimatedDurationSeconds: estimatedDurationSeconds,
       );
 
       AppLogger.info('Task updated: $id');

@@ -30,6 +30,9 @@ class TaskRepository {
     String? description,
     required String syncId,
     required String userId,
+    String category = 'work',
+    String color = '#7143AC',
+    int? estimatedDurationSeconds,
   }) {
     final now = DateTime.now();
 
@@ -44,6 +47,9 @@ class TaskRepository {
             createdAt: now,
             updatedAt: now,
             syncStatus: SyncStatus.pendingCreate.name,
+            category: Value(category),
+            color: Value(color),
+            estimatedDurationSeconds: Value(estimatedDurationSeconds),
           ),
         );
   }
@@ -99,6 +105,9 @@ class TaskRepository {
     required DateTime updatedAt,
     required bool archived,
     required bool favorite,
+    String category = 'work',
+    String color = '#7143AC',
+    int? estimatedDurationSeconds,
     DateTime? deletedAt,
   }) async {
     await database
@@ -115,6 +124,9 @@ class TaskRepository {
             favorite: Value(favorite),
             syncStatus: SyncStatus.synced.name,
             deletedAt: Value(deletedAt),
+            category: Value(category),
+            color: Value(color),
+            estimatedDurationSeconds: Value(estimatedDurationSeconds),
           ),
         );
   }
@@ -127,6 +139,9 @@ class TaskRepository {
     required DateTime updatedAt,
     required bool archived,
     required bool favorite,
+    String category = 'work',
+    String color = '#7143AC',
+    int? estimatedDurationSeconds,
     DateTime? deletedAt,
   }) async {
     await (database.update(
@@ -141,6 +156,9 @@ class TaskRepository {
         favorite: Value(favorite),
         deletedAt: Value(deletedAt),
         syncStatus: Value(SyncStatus.synced.name),
+        category: Value(category),
+        color: Value(color),
+        estimatedDurationSeconds: Value(estimatedDurationSeconds),
       ),
     );
   }
@@ -161,6 +179,9 @@ class TaskRepository {
     required int id,
     required String name,
     String? description,
+    String? category,
+    String? color,
+    int? estimatedDurationSeconds,
   }) {
     return (database.update(
       database.tasks,
@@ -170,6 +191,11 @@ class TaskRepository {
         description: Value(description),
         updatedAt: Value(DateTime.now()),
         syncStatus: Value(SyncStatus.pendingUpdate.name),
+        category: category == null ? const Value.absent() : Value(category),
+        color: color == null ? const Value.absent() : Value(color),
+        estimatedDurationSeconds: estimatedDurationSeconds == null
+            ? const Value.absent()
+            : Value(estimatedDurationSeconds),
       ),
     );
   }
