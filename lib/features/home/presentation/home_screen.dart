@@ -81,6 +81,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   context.push('/history');
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.dashboard_outlined),
+                title: const Text('Background Testing'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.push('/background-testing');
+                },
+              ),
 
               const Spacer(),
 

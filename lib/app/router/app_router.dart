@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/tasks/presentation/tasks_screen.dart';
+
 import '../../features/authentication/data/auth_providers.dart';
 import '../../features/authentication/presentation/login_screen.dart';
-import '../../features/home/presentation/home_screen.dart';
-import '../../features/tasks/presentation/archived_tasks_screen.dart';
 import '../../features/authentication/presentation/signup_screen.dart';
+import '../../features/tasks/presentation/archived_tasks_screen.dart';
 import '../../features/timer/presentation/history_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../testing_screens/background_testing_screen.dart';
+
+import '../presentation/main_navigation_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateChangesProvider);
@@ -38,30 +40,57 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
 
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) {
-          return const LoginScreen();
-        },
-      ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) {
-          return const HomeScreen();
-        },
-      ),
+      // Authentication
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/signup',
-        builder: (context, state) {
-          return const SignupScreen();
-        },
+        builder: (context, state) => const SignupScreen(),
       ),
-      GoRoute(
-        path: '/tasks',
-        builder: (context, state) {
-          return const TasksScreen();
+
+      // Main navigation shell
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainNavigationShell(navigationShell: navigationShell);
         },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const MainTabPage(title: 'Home'),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/tasks',
+                builder: (context, state) => const MainTabPage(title: 'Tasks'),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/projects',
+                builder: (context, state) =>
+                    const MainTabPage(title: 'Projects'),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/insights',
+                builder: (context, state) =>
+                    const MainTabPage(title: 'Insights'),
+              ),
+            ],
+          ),
+        ],
       ),
+
+      // Secondary screens
       GoRoute(
         path: '/archived-tasks',
         builder: (context, state) => const ArchivedTasksScreen(),
@@ -73,6 +102,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: '/background-testing',
+        builder: (context, state) => const BackgroundTestingScreen(),
       ),
     ],
   );
