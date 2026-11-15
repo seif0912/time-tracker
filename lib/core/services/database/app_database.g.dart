@@ -2475,6 +2475,418 @@ class ActiveTimersCompanion extends UpdateCompanion<ActiveTimer> {
   }
 }
 
+class $TimeEntrySegmentsTable extends TimeEntrySegments
+    with TableInfo<$TimeEntrySegmentsTable, TimeEntrySegment> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TimeEntrySegmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _taskIdMeta = const VerificationMeta('taskId');
+  @override
+  late final GeneratedColumn<int> taskId = GeneratedColumn<int>(
+    'task_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endedAtMeta = const VerificationMeta(
+    'endedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> endedAt = GeneratedColumn<DateTime>(
+    'ended_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _durationSecondsMeta = const VerificationMeta(
+    'durationSeconds',
+  );
+  @override
+  late final GeneratedColumn<int> durationSeconds = GeneratedColumn<int>(
+    'duration_seconds',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    userId,
+    taskId,
+    startedAt,
+    endedAt,
+    durationSeconds,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'time_entry_segments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TimeEntrySegment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('task_id')) {
+      context.handle(
+        _taskIdMeta,
+        taskId.isAcceptableOrUnknown(data['task_id']!, _taskIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_taskIdMeta);
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedAtMeta);
+    }
+    if (data.containsKey('ended_at')) {
+      context.handle(
+        _endedAtMeta,
+        endedAt.isAcceptableOrUnknown(data['ended_at']!, _endedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endedAtMeta);
+    }
+    if (data.containsKey('duration_seconds')) {
+      context.handle(
+        _durationSecondsMeta,
+        durationSeconds.isAcceptableOrUnknown(
+          data['duration_seconds']!,
+          _durationSecondsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_durationSecondsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TimeEntrySegment map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TimeEntrySegment(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      taskId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}task_id'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      )!,
+      endedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}ended_at'],
+      )!,
+      durationSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_seconds'],
+      )!,
+    );
+  }
+
+  @override
+  $TimeEntrySegmentsTable createAlias(String alias) {
+    return $TimeEntrySegmentsTable(attachedDatabase, alias);
+  }
+}
+
+class TimeEntrySegment extends DataClass
+    implements Insertable<TimeEntrySegment> {
+  final int id;
+
+  /// Firebase Authentication UID that owns this segment.
+  final String userId;
+
+  /// Local Task ID.
+  final int taskId;
+
+  /// Exact start of this continuous tracking segment.
+  final DateTime startedAt;
+
+  /// Exact end of this continuous tracking segment.
+  final DateTime endedAt;
+
+  /// Actual tracked duration, excluding paused time.
+  final int durationSeconds;
+  const TimeEntrySegment({
+    required this.id,
+    required this.userId,
+    required this.taskId,
+    required this.startedAt,
+    required this.endedAt,
+    required this.durationSeconds,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['user_id'] = Variable<String>(userId);
+    map['task_id'] = Variable<int>(taskId);
+    map['started_at'] = Variable<DateTime>(startedAt);
+    map['ended_at'] = Variable<DateTime>(endedAt);
+    map['duration_seconds'] = Variable<int>(durationSeconds);
+    return map;
+  }
+
+  TimeEntrySegmentsCompanion toCompanion(bool nullToAbsent) {
+    return TimeEntrySegmentsCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      taskId: Value(taskId),
+      startedAt: Value(startedAt),
+      endedAt: Value(endedAt),
+      durationSeconds: Value(durationSeconds),
+    );
+  }
+
+  factory TimeEntrySegment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TimeEntrySegment(
+      id: serializer.fromJson<int>(json['id']),
+      userId: serializer.fromJson<String>(json['userId']),
+      taskId: serializer.fromJson<int>(json['taskId']),
+      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
+      endedAt: serializer.fromJson<DateTime>(json['endedAt']),
+      durationSeconds: serializer.fromJson<int>(json['durationSeconds']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'userId': serializer.toJson<String>(userId),
+      'taskId': serializer.toJson<int>(taskId),
+      'startedAt': serializer.toJson<DateTime>(startedAt),
+      'endedAt': serializer.toJson<DateTime>(endedAt),
+      'durationSeconds': serializer.toJson<int>(durationSeconds),
+    };
+  }
+
+  TimeEntrySegment copyWith({
+    int? id,
+    String? userId,
+    int? taskId,
+    DateTime? startedAt,
+    DateTime? endedAt,
+    int? durationSeconds,
+  }) => TimeEntrySegment(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    taskId: taskId ?? this.taskId,
+    startedAt: startedAt ?? this.startedAt,
+    endedAt: endedAt ?? this.endedAt,
+    durationSeconds: durationSeconds ?? this.durationSeconds,
+  );
+  TimeEntrySegment copyWithCompanion(TimeEntrySegmentsCompanion data) {
+    return TimeEntrySegment(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      taskId: data.taskId.present ? data.taskId.value : this.taskId,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
+      durationSeconds: data.durationSeconds.present
+          ? data.durationSeconds.value
+          : this.durationSeconds,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TimeEntrySegment(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('taskId: $taskId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('durationSeconds: $durationSeconds')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, userId, taskId, startedAt, endedAt, durationSeconds);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TimeEntrySegment &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.taskId == this.taskId &&
+          other.startedAt == this.startedAt &&
+          other.endedAt == this.endedAt &&
+          other.durationSeconds == this.durationSeconds);
+}
+
+class TimeEntrySegmentsCompanion extends UpdateCompanion<TimeEntrySegment> {
+  final Value<int> id;
+  final Value<String> userId;
+  final Value<int> taskId;
+  final Value<DateTime> startedAt;
+  final Value<DateTime> endedAt;
+  final Value<int> durationSeconds;
+  const TimeEntrySegmentsCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.taskId = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.endedAt = const Value.absent(),
+    this.durationSeconds = const Value.absent(),
+  });
+  TimeEntrySegmentsCompanion.insert({
+    this.id = const Value.absent(),
+    required String userId,
+    required int taskId,
+    required DateTime startedAt,
+    required DateTime endedAt,
+    required int durationSeconds,
+  }) : userId = Value(userId),
+       taskId = Value(taskId),
+       startedAt = Value(startedAt),
+       endedAt = Value(endedAt),
+       durationSeconds = Value(durationSeconds);
+  static Insertable<TimeEntrySegment> custom({
+    Expression<int>? id,
+    Expression<String>? userId,
+    Expression<int>? taskId,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? endedAt,
+    Expression<int>? durationSeconds,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (taskId != null) 'task_id': taskId,
+      if (startedAt != null) 'started_at': startedAt,
+      if (endedAt != null) 'ended_at': endedAt,
+      if (durationSeconds != null) 'duration_seconds': durationSeconds,
+    });
+  }
+
+  TimeEntrySegmentsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? userId,
+    Value<int>? taskId,
+    Value<DateTime>? startedAt,
+    Value<DateTime>? endedAt,
+    Value<int>? durationSeconds,
+  }) {
+    return TimeEntrySegmentsCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      taskId: taskId ?? this.taskId,
+      startedAt: startedAt ?? this.startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (taskId.present) {
+      map['task_id'] = Variable<int>(taskId.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (endedAt.present) {
+      map['ended_at'] = Variable<DateTime>(endedAt.value);
+    }
+    if (durationSeconds.present) {
+      map['duration_seconds'] = Variable<int>(durationSeconds.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TimeEntrySegmentsCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('taskId: $taskId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('durationSeconds: $durationSeconds')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2482,6 +2894,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TimeEntriesTable timeEntries = $TimeEntriesTable(this);
   late final $UserProfilesTable userProfiles = $UserProfilesTable(this);
   late final $ActiveTimersTable activeTimers = $ActiveTimersTable(this);
+  late final $TimeEntrySegmentsTable timeEntrySegments =
+      $TimeEntrySegmentsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2491,6 +2905,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     timeEntries,
     userProfiles,
     activeTimers,
+    timeEntrySegments,
   ];
 }
 
@@ -3662,6 +4077,234 @@ typedef $$ActiveTimersTableProcessedTableManager =
       ActiveTimer,
       PrefetchHooks Function()
     >;
+typedef $$TimeEntrySegmentsTableCreateCompanionBuilder =
+    TimeEntrySegmentsCompanion Function({
+      Value<int> id,
+      required String userId,
+      required int taskId,
+      required DateTime startedAt,
+      required DateTime endedAt,
+      required int durationSeconds,
+    });
+typedef $$TimeEntrySegmentsTableUpdateCompanionBuilder =
+    TimeEntrySegmentsCompanion Function({
+      Value<int> id,
+      Value<String> userId,
+      Value<int> taskId,
+      Value<DateTime> startedAt,
+      Value<DateTime> endedAt,
+      Value<int> durationSeconds,
+    });
+
+class $$TimeEntrySegmentsTableFilterComposer
+    extends Composer<_$AppDatabase, $TimeEntrySegmentsTable> {
+  $$TimeEntrySegmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TimeEntrySegmentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TimeEntrySegmentsTable> {
+  $$TimeEntrySegmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TimeEntrySegmentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TimeEntrySegmentsTable> {
+  $$TimeEntrySegmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<int> get taskId =>
+      $composableBuilder(column: $table.taskId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endedAt =>
+      $composableBuilder(column: $table.endedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => column,
+  );
+}
+
+class $$TimeEntrySegmentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TimeEntrySegmentsTable,
+          TimeEntrySegment,
+          $$TimeEntrySegmentsTableFilterComposer,
+          $$TimeEntrySegmentsTableOrderingComposer,
+          $$TimeEntrySegmentsTableAnnotationComposer,
+          $$TimeEntrySegmentsTableCreateCompanionBuilder,
+          $$TimeEntrySegmentsTableUpdateCompanionBuilder,
+          (
+            TimeEntrySegment,
+            BaseReferences<
+              _$AppDatabase,
+              $TimeEntrySegmentsTable,
+              TimeEntrySegment
+            >,
+          ),
+          TimeEntrySegment,
+          PrefetchHooks Function()
+        > {
+  $$TimeEntrySegmentsTableTableManager(
+    _$AppDatabase db,
+    $TimeEntrySegmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TimeEntrySegmentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TimeEntrySegmentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TimeEntrySegmentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<int> taskId = const Value.absent(),
+                Value<DateTime> startedAt = const Value.absent(),
+                Value<DateTime> endedAt = const Value.absent(),
+                Value<int> durationSeconds = const Value.absent(),
+              }) => TimeEntrySegmentsCompanion(
+                id: id,
+                userId: userId,
+                taskId: taskId,
+                startedAt: startedAt,
+                endedAt: endedAt,
+                durationSeconds: durationSeconds,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String userId,
+                required int taskId,
+                required DateTime startedAt,
+                required DateTime endedAt,
+                required int durationSeconds,
+              }) => TimeEntrySegmentsCompanion.insert(
+                id: id,
+                userId: userId,
+                taskId: taskId,
+                startedAt: startedAt,
+                endedAt: endedAt,
+                durationSeconds: durationSeconds,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TimeEntrySegmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TimeEntrySegmentsTable,
+      TimeEntrySegment,
+      $$TimeEntrySegmentsTableFilterComposer,
+      $$TimeEntrySegmentsTableOrderingComposer,
+      $$TimeEntrySegmentsTableAnnotationComposer,
+      $$TimeEntrySegmentsTableCreateCompanionBuilder,
+      $$TimeEntrySegmentsTableUpdateCompanionBuilder,
+      (
+        TimeEntrySegment,
+        BaseReferences<
+          _$AppDatabase,
+          $TimeEntrySegmentsTable,
+          TimeEntrySegment
+        >,
+      ),
+      TimeEntrySegment,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3674,4 +4317,6 @@ class $AppDatabaseManager {
       $$UserProfilesTableTableManager(_db, _db.userProfiles);
   $$ActiveTimersTableTableManager get activeTimers =>
       $$ActiveTimersTableTableManager(_db, _db.activeTimers);
+  $$TimeEntrySegmentsTableTableManager get timeEntrySegments =>
+      $$TimeEntrySegmentsTableTableManager(_db, _db.timeEntrySegments);
 }

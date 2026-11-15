@@ -7,6 +7,8 @@ import '../../features/authentication/presentation/signup_screen.dart';
 import '../../features/tasks/presentation/archived_tasks_screen.dart';
 import '../../features/timer/presentation/history_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/subscription/upgrade_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
 import '../../testing_screens/background_testing_screen.dart';
 
 import '../presentation/main_navigation_shell.dart';
@@ -57,7 +59,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/home',
-                builder: (context, state) => const MainTabPage(title: 'Home'),
+                builder: (context, state) => const HomeScreen(),
               ),
             ],
           ),
@@ -91,6 +93,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Secondary screens
+      GoRoute(
+        path: '/upgrade',
+        builder: (context, state) => const UpgradeScreen(),
+      ),
       GoRoute(
         path: '/archived-tasks',
         builder: (context, state) => const ArchivedTasksScreen(),

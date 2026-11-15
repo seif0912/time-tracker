@@ -5,16 +5,19 @@ import 'tables/tasks.dart';
 import 'tables/time_entries.dart';
 import 'tables/user_profiles.dart';
 import 'tables/active_timers.dart';
+import 'tables/time_entry_segments.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Tasks, TimeEntries, UserProfiles, ActiveTimers])
+@DriftDatabase(
+  tables: [Tasks, TimeEntries, UserProfiles, ActiveTimers, TimeEntrySegments],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -48,6 +51,9 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(tasks, tasks.category);
         await m.addColumn(tasks, tasks.color);
         await m.addColumn(tasks, tasks.estimatedDurationSeconds);
+      }
+      if (from < 7) {
+        await m.createTable(timeEntrySegments);
       }
     },
   );

@@ -15,7 +15,7 @@ void main() {
   });
 
   test('creates the current schema successfully', () async {
-    expect(database.schemaVersion, 6);
+    expect(database.schemaVersion, 7);
 
     final tasks = await database.select(database.tasks).get();
     final timeEntries = await database.select(database.timeEntries).get();

@@ -34,24 +34,12 @@ class MainNavigationShell extends StatelessWidget {
   ];
 
   @override
+  @override
   Widget build(BuildContext context) {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
     final currentIndex = navigationShell.currentIndex;
 
     return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        title: Text(_destinations[currentIndex].title),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            tooltip: 'Settings',
-            onPressed: () => scaffoldKey.currentState?.openEndDrawer(),
-            icon: const Icon(Icons.tune_rounded),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
+      backgroundColor: Colors.transparent,
       endDrawer: const _SettingsDrawer(),
       body: navigationShell,
       bottomNavigationBar: _BottomNavigationBar(
@@ -233,10 +221,18 @@ class _SettingsDrawer extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               const Divider(),
-              const SizedBox(height: 16),
-              Text(
-                'More options coming soon',
-                style: theme.textTheme.bodyMedium,
+
+              const SizedBox(height: 12),
+
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.palette_outlined),
+                title: const Text('UI Testing'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.push('/background-testing');
+                },
               ),
             ],
           ),

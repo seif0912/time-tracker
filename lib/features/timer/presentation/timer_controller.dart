@@ -66,6 +66,27 @@ class TimerController extends Notifier<TimerState> {
         .save(userId: userId, session: session);
   }
 
+  Future<void> _saveSegment({
+    required int taskId,
+    required DateTime startedAt,
+    required DateTime endedAt,
+    required int durationSeconds,
+  }) async {
+    final userId = ref.read(currentUserIdProvider);
+
+    if (userId == null || durationSeconds <= 0) return;
+
+    await ref
+        .read(timeEntryRepositoryProvider)
+        .createTimeEntrySegment(
+          userId: userId,
+          taskId: taskId,
+          startedAt: startedAt,
+          endedAt: endedAt,
+          durationSeconds: durationSeconds,
+        );
+  }
+
   Future<void> _deletePersistedSession(int taskId) async {
     final userId = ref.read(currentUserIdProvider);
 
@@ -86,9 +107,14 @@ class TimerController extends Notifier<TimerState> {
       return;
     }
 
-    final runningSession = state.runningSession;
+    // A task must be stopped before another task can be started.
+    // Allow starting only when there are no sessions, or when this
+    // task already owns the existing session.
+    if (state.sessions.isNotEmpty && !state.sessions.containsKey(taskId)) {
+      return;
+    }
 
-    if (runningSession != null) {
+    if (state.hasRunningSession) {
       return;
     }
 
@@ -160,11 +186,10 @@ class TimerController extends Notifier<TimerState> {
 
     final segmentStart = session.currentSegmentStartedAt;
 
-    if (segmentStart == null) {
-      return;
-    }
+    if (segmentStart == null) return;
 
-    final segmentDuration = DateTime.now().difference(segmentStart).inSeconds;
+    final now = DateTime.now();
+    final segmentDuration = now.difference(segmentStart).inSeconds;
 
     _ticker?.cancel();
 
@@ -176,10 +201,19 @@ class TimerController extends Notifier<TimerState> {
     );
 
     final sessions = Map<int, TimerSessionState>.from(state.sessions);
-
     sessions[taskId] = updatedSession;
 
     state = state.copyWith(sessions: sessions);
+
+    // Save the segment independently when the timer is paused.
+    unawaited(
+      _saveSegment(
+        taskId: taskId,
+        startedAt: segmentStart,
+        endedAt: now,
+        durationSeconds: segmentDuration,
+      ),
+    );
 
     unawaited(_persistSession(updatedSession));
   }
@@ -192,6 +226,11 @@ class TimerController extends Notifier<TimerState> {
     }
 
     if (state.hasRunningSession) {
+      return;
+    }
+
+    // Do not resume a task if another task still has an active session.
+    if (state.sessions.keys.any((id) => id != taskId)) {
       return;
     }
 
@@ -217,18 +256,22 @@ class TimerController extends Notifier<TimerState> {
   Future<void> stop(int taskId) async {
     final session = state.sessionForTask(taskId);
 
-    if (session == null) {
-      return;
-    }
+    if (session == null) return;
 
-    var totalSeconds = session.accumulatedSeconds;
+    final now = DateTime.now();
+
+    DateTime? finalSegmentStartedAt;
+    var finalSegmentDuration = 0;
 
     if (session.status == TimerStatus.running &&
         session.currentSegmentStartedAt != null) {
-      totalSeconds += DateTime.now()
+      finalSegmentStartedAt = session.currentSegmentStartedAt;
+      finalSegmentDuration = now
           .difference(session.currentSegmentStartedAt!)
           .inSeconds;
     }
+
+    final totalSeconds = session.accumulatedSeconds + finalSegmentDuration;
 
     _ticker?.cancel();
 
@@ -244,21 +287,21 @@ class TimerController extends Notifier<TimerState> {
       return;
     }
 
-    if (userId == null) {
-      return;
-    }
+    if (userId == null) return;
 
     final syncId = ref.read(syncIdGeneratorProvider).generate();
 
     final repository = ref.read(timeEntryRepositoryProvider);
 
-    await repository.createTimeEntry(
+    await repository.completeTimeEntry(
       taskId: taskId,
       syncId: syncId,
       userId: userId,
       startedAt: session.startedAt,
-      endedAt: DateTime.now(),
+      endedAt: now,
       durationSeconds: totalSeconds,
+      segmentStartedAt: finalSegmentStartedAt,
+      segmentDurationSeconds: finalSegmentDuration,
     );
 
     await _deletePersistedSession(taskId);
